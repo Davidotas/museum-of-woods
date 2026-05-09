@@ -1,0 +1,545 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+/* ── Night theme (default) ───────────────────────────────────── */
+:root {
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --nav-h: 72px;
+
+  /* RGB channels — used by Tailwind opacity modifiers */
+  --cr-forest:   15 21 16;       /* #0f1510 very dark green bg    */
+  --cr-bark:     26 35 24;       /* #1a2318 dark green panels     */
+  --cr-amber:    201 162 126;    /* #c9a27e warm gold accents     */
+  --cr-grain:    232 213 183;    /* #e8d5b7 tan borders           */
+  --cr-moss:     61 90 62;       /* #3d5a3e medium green          */
+  --cr-fog:      245 242 236;    /* #f5f2ec bright off-white text */
+  --cr-fog2:     200 196 188;    /* #c8c4bc muted text            */
+  --cr-fog3:     140 136 128;    /* #888880 subtle text           */
+  --cr-ember:    181 115 42;     /* #b5732a deep amber            */
+  --cr-charcoal: 28 28 28;       /* #1c1c1c near-black            */
+  --cr-card:     20 28 18;       /* #141c12 card bg               */
+
+  /* Hex aliases kept for non-Tailwind usage */
+  --color-forest:   #0f1510;
+  --color-bark:     #1a2318;
+  --color-amber:    #c9a27e;
+  --color-grain:    #e8d5b7;
+  --color-fog:      #f5f2ec;
+  --color-fog2:     #c8c4bc;
+  --color-fog3:     #888880;
+  --color-ember:    #b5732a;
+  --color-card:     #141c12;
+
+  /* Semantic aliases */
+  --bg-primary:   #0f1510;
+  --bg-secondary: #1a2318;
+  --bg-card:      #141c12;
+  --text-primary: #f5f2ec;
+  --text-muted:   #c8c4bc;
+  --text-subtle:  #888880;
+  --accent:       #c9a27e;
+
+  /* Three.js scene bg */
+  --scene-bg: 0x0f1510;
+  --scene-bg-hex: #0f1510;
+  --spiral-emissive: 0xb5732a;
+
+  /* Cart sidebar */
+  --cart-bg: #1c2419;
+
+  /* Nav */
+  --nav-bg-top:      rgba(13,20,16,0.55);
+  --nav-bg-scrolled: rgba(13,20,16,0.96);
+  --nav-text:        rgba(245,242,236,0.75);
+  --nav-text-active: #c9a27e;
+  --nav-border:      rgba(201,162,126,0.08);
+  --nav-mobile-bg:   rgba(10,16,12,0.98);
+}
+
+/* ── Day theme — pure white + black + brown ──────────────────── */
+html.day {
+  --cr-forest:   255 255 255;    /* #ffffff pure white bg         */
+  --cr-bark:     245 245 245;    /* #f5f5f5 light gray panels     */
+  --cr-amber:    110 60 20;      /* #6e3c14 deep brown accent     */
+  --cr-grain:    140 100 65;     /* #8c6441 medium brown          */
+  --cr-moss:     30 60 32;       /* #1e3c20 deep green            */
+  --cr-fog:      10 10 10;       /* #0a0a0a near-black text       */
+  --cr-fog2:     50 50 50;       /* #323232 dark secondary text   */
+  --cr-fog3:     110 110 110;    /* #6e6e6e muted/subtle text     */
+  --cr-ember:    90 45 12;       /* #5a2d0c dark ember            */
+  --cr-charcoal: 235 235 235;    /* #ebebeb light border/panel    */
+  --cr-card:     248 248 248;    /* #f8f8f8 card background       */
+
+  --color-forest:   #ffffff;
+  --color-bark:     #f5f5f5;
+  --color-amber:    #6e3c14;
+  --color-grain:    #8c6441;
+  --color-fog:      #0a0a0a;
+  --color-fog2:     #323232;
+  --color-fog3:     #6e6e6e;
+  --color-ember:    #5a2d0c;
+  --color-card:     #f8f8f8;
+
+  --bg-primary:   #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-card:      #f8f8f8;
+  --text-primary: #0a0a0a;
+  --text-muted:   #323232;
+  --text-subtle:  #6e6e6e;
+  --accent:       #6e3c14;
+
+  --scene-bg-hex: #f5f5f5;
+  --spiral-emissive: 0x6e3c14;
+  --cart-bg:      #ffffff;
+
+  /* Nav — always dark regardless of day/night */
+  --nav-bg-top:      rgba(5,5,5,0.75);
+  --nav-bg-scrolled: rgba(5,5,5,0.97);
+  --nav-text:        rgba(255,255,255,0.78);
+  --nav-text-active: #c9a27e;
+  --nav-border:      rgba(255,255,255,0.06);
+  --nav-mobile-bg:   rgba(5,5,5,0.99);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: auto; }
+
+/* Smooth transition when toggling theme */
+html, html * {
+  transition: background-color 0.45s ease, color 0.45s ease,
+              border-color 0.45s ease !important;
+}
+html .no-theme-transition,
+html .no-theme-transition * { transition: none !important; }
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-weight: 300;
+  overflow-x: hidden;
+}
+
+/* ── Nav (always dark — never inverts in day mode) ───────────── */
+.nav-bar {
+  background: var(--nav-bg-top);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--nav-border);
+  transition: background 0.4s ease !important;
+}
+.nav-bar.scrolled {
+  background: var(--nav-bg-scrolled);
+  border-bottom-color: rgba(201,162,126,0.12);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.nav-link {
+  color: var(--nav-text);
+  transition: color 0.3s ease;
+}
+.nav-link:hover,
+.nav-link.active { color: var(--nav-text-active); }
+
+/* ── Section theming ─────────────────────────────────────────── */
+/* These classes are for theme-aware sections (not hardcoded dark) */
+.section-primary {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+.section-secondary {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+.section-body {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+.text-subtle { color: var(--text-subtle); }
+
+/* ── Cursor ──────────────────────────────────────────────────── */
+.cursor {
+  position: fixed; top: 0; left: 0;
+  width: 10px; height: 10px;
+  background: var(--color-amber);
+  border-radius: 50%; pointer-events: none;
+  z-index: 9999; transform: translate(-50%,-50%);
+  mix-blend-mode: difference;
+  transition: width .25s, height .25s;
+}
+.cursor-follower {
+  position: fixed; top: 0; left: 0;
+  width: 32px; height: 32px;
+  border: 1px solid rgba(201,162,126,.35);
+  border-radius: 50%; pointer-events: none;
+  z-index: 9998; transform: translate(-50%,-50%);
+}
+
+/* ── Canvas ───────────────────────────────────────────────────── */
+#canvas-container {
+  position: fixed; inset: 0;
+  z-index: 0; pointer-events: none;
+}
+
+/* ── Scroll sections ──────────────────────────────────────────── */
+.scroll-section {
+  position: relative; z-index: 1; min-height: 100vh;
+  display: flex; align-items: center;
+}
+.page-section {
+  position: relative; z-index: 1;
+}
+
+/* ── Typography ───────────────────────────────────────────────── */
+.display { font-family: var(--font-serif); font-weight: 300; }
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.btn-primary {
+  @apply inline-flex items-center gap-2 font-sans text-xs tracking-widest uppercase
+         px-8 py-3.5 transition-colors duration-500;
+  background-color: var(--color-amber);
+  color: var(--bg-primary);
+}
+.btn-primary:hover {
+  background-color: var(--color-grain);
+}
+.btn-outline {
+  @apply inline-flex items-center gap-2 font-sans text-xs tracking-widest uppercase
+         px-8 py-3.5 transition-all duration-500;
+  border: 1px solid rgba(201,162,126,0.4);
+  color: var(--color-amber);
+}
+.btn-outline:hover {
+  background-color: var(--color-amber);
+  color: var(--bg-primary);
+}
+.btn-ghost {
+  @apply inline-flex items-center gap-2 font-sans text-xs tracking-widest uppercase
+         transition-colors duration-300;
+  color: var(--text-subtle);
+}
+.btn-ghost:hover { color: var(--text-primary); }
+
+/* ── Cards ────────────────────────────────────────────────────── */
+.card-wood {
+  background: rgba(var(--cr-bark) / 0.5);
+  border: 1px solid rgba(var(--cr-fog) / 0.06);
+  transition: border-color 0.5s ease;
+}
+.card-wood:hover {
+  border-color: rgba(var(--cr-amber) / 0.3);
+}
+
+/* ── Tags ─────────────────────────────────────────────────────── */
+.tag {
+  @apply inline-flex items-center font-sans text-[10px] tracking-[.2em] uppercase
+         px-2.5 py-1;
+  border: 1px solid rgba(var(--cr-fog) / 0.12);
+  color: var(--text-subtle);
+}
+.tag-amber {
+  @apply inline-flex items-center font-sans text-[10px] tracking-[.2em] uppercase
+         px-2.5 py-1;
+  background: rgba(var(--cr-amber) / 0.12);
+  border: 1px solid rgba(var(--cr-amber) / 0.3);
+  color: var(--color-amber);
+}
+
+/* ── Section label ────────────────────────────────────────────── */
+.section-label {
+  @apply font-sans text-[10px] tracking-[.4em] uppercase block mb-8;
+  color: rgba(var(--cr-amber) / 0.7);
+}
+.section-title {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(2rem, 4.5vw, 4rem);
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+/* ── Nav height offset ────────────────────────────────────────── */
+.pt-nav { padding-top: var(--nav-h); }
+
+/* ── Divider ──────────────────────────────────────────────────── */
+.wood-line {
+  width: 1px; height: 64px;
+  background: linear-gradient(to bottom, transparent, var(--color-amber), transparent);
+  margin: 0 auto;
+}
+.wood-line-h {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(201,162,126,.3), transparent);
+}
+
+/* ── Image aspect helpers ─────────────────────────────────────── */
+.aspect-product { aspect-ratio: 4/5; }
+.aspect-card    { aspect-ratio: 3/2; }
+.aspect-hero    { aspect-ratio: 16/9; }
+
+/* ── Scrollbar ────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--color-amber); border-radius: 2px; }
+
+::selection { background: var(--color-amber); color: var(--bg-primary); }
+
+/* ── Cart sidebar ─────────────────────────────────────────────── */
+.cart-sidebar {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: min(420px, 100vw);
+  background: var(--cart-bg);
+  border-left: 1px solid rgba(201,162,126,.12);
+  z-index: 200;
+  transform: translateX(100%);
+  transition: transform .45s cubic-bezier(.23,1,.32,1);
+}
+.cart-sidebar.open { transform: translateX(0); }
+
+/* ── Overlay ──────────────────────────────────────────────────── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(4px);
+  z-index: 199;
+  opacity: 0; pointer-events: none;
+  transition: opacity .4s ease;
+}
+.overlay.visible { opacity: 1; pointer-events: all; }
+
+/* ── Difficulty dots ──────────────────────────────────────────── */
+.dot-fill  { @apply w-2 h-2 rounded-full; background: var(--color-amber); }
+.dot-empty { @apply w-2 h-2 rounded-full; background: rgba(var(--cr-fog) / 0.15); }
+
+/* ── Input / Textarea ─────────────────────────────────────────── */
+.input-wood {
+  @apply w-full font-sans text-sm px-4 py-3
+         focus:outline-none transition-colors duration-300;
+  background: var(--bg-card);
+  border: 1px solid rgba(var(--cr-fog) / 0.1);
+  color: var(--text-primary);
+}
+.input-wood::placeholder { color: var(--text-subtle); }
+.input-wood:focus { border-color: rgba(var(--cr-amber) / 0.5); }
+
+.textarea-wood {
+  @apply w-full font-sans text-sm px-4 py-3 resize-none
+         focus:outline-none transition-colors duration-300;
+  background: var(--bg-card);
+  border: 1px solid rgba(var(--cr-fog) / 0.1);
+  color: var(--text-primary);
+}
+.textarea-wood::placeholder { color: var(--text-subtle); }
+.textarea-wood:focus { border-color: rgba(var(--cr-amber) / 0.5); }
+
+.select-wood {
+  @apply w-full font-sans text-sm px-4 py-3 appearance-none
+         focus:outline-none transition-colors duration-300;
+  background: var(--bg-card);
+  border: 1px solid rgba(var(--cr-fog) / 0.1);
+  color: var(--text-primary);
+}
+.select-wood:focus { border-color: rgba(var(--cr-amber) / 0.5); }
+
+/* ── Range slider ─────────────────────────────────────────────── */
+input[type=range] { accent-color: var(--color-amber); }
+
+/* ── Progress bar ─────────────────────────────────────────────── */
+.progress-bar {
+  height: 2px;
+  background: linear-gradient(to right, var(--color-amber), var(--color-ember));
+}
+
+/* ── Before/after slider ──────────────────────────────────────── */
+.ba-container { position: relative; overflow: hidden; user-select: none; }
+.ba-handle {
+  position: absolute; top: 0; bottom: 0;
+  width: 2px; background: var(--color-amber);
+  cursor: ew-resize;
+}
+.ba-handle::before {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--color-amber);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── Theme toggle ─────────────────────────────────────────────── */
+.theme-toggle-track {
+  width: 48px; height: 26px;
+  border-radius: 13px;
+  background: rgba(var(--cr-fog) / 0.1);
+  border: 1px solid rgba(var(--cr-fog) / 0.15);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+html.day .theme-toggle-track {
+  background: rgba(var(--cr-amber) / 0.15);
+  border-color: rgba(var(--cr-amber) / 0.3);
+}
+.theme-toggle-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--color-amber);
+  position: absolute;
+  top: 3px; left: 4px;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+html.day .theme-toggle-thumb {
+  transform: translateX(22px);
+}
+
+/* ── Marquee ──────────────────────────────────────────────────── */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes marquee-reverse {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+.animate-marquee         { animation: marquee 40s linear infinite; }
+.animate-marquee-reverse { animation: marquee-reverse 40s linear infinite; }
+.animate-marquee:hover, .animate-marquee-reverse:hover { animation-play-state: paused; }
+
+/* ── Glow pulse ───────────────────────────────────────────────── */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201,162,126,0); }
+  50%       { box-shadow: 0 0 24px 4px rgba(201,162,126,0.18); }
+}
+.glow-amber { animation: glow-pulse 3s ease-in-out infinite; }
+
+/* ── Float up ─────────────────────────────────────────────────── */
+@keyframes float-up {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+.animate-float { animation: float-up 4s ease-in-out infinite; }
+
+/* ── Shimmer ──────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.shimmer-text {
+  background: linear-gradient(90deg, var(--color-amber) 0%, var(--color-fog) 50%, var(--color-amber) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ── Fade-in up (generic) ─────────────────────────────────────── */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim-fade-up { animation: fade-in-up 0.8s ease-out forwards; }
+
+/* ── Stagger reveal ───────────────────────────────────────────── */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(40px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.reveal-up { opacity: 0; }
+.reveal-up.visible { animation: reveal-up 0.9s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ── Card hover lift ──────────────────────────────────────────── */
+.card-lift {
+  transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s ease;
+}
+.card-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.25);
+}
+
+/* ── Image reveal wipe ────────────────────────────────────────── */
+@keyframes wipe-right {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0% 0 0); }
+}
+.wipe-reveal { animation: wipe-right 1.2s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ── Number count up ──────────────────────────────────────────── */
+@keyframes count-up {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.count-anim { animation: count-up 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+/* ── Pulsing border ───────────────────────────────────────────── */
+@keyframes border-pulse {
+  0%, 100% { border-color: rgba(201,162,126,0.15); }
+  50%       { border-color: rgba(201,162,126,0.45); }
+}
+.border-pulse { animation: border-pulse 2.5s ease-in-out infinite; }
+
+/* ── Smooth image load ────────────────────────────────────────── */
+img { transition: opacity 0.5s ease; }
+img[loading] { opacity: 0; }
+img.loaded   { opacity: 1; }
+
+/* ── Hover underline slide ────────────────────────────────────── */
+.underline-slide { position: relative; }
+.underline-slide::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 0; height: 1px;
+  background: var(--color-amber);
+  transition: width 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+.underline-slide:hover::after { width: 100%; }
+
+/* ══════════════════════════════════════════════════════
+   SR — Scroll Reveal (IntersectionObserver based)
+   Default: VISIBLE. Animation adds a nice entrance.
+   Content is NEVER invisible if JS doesn't fire.
+   ══════════════════════════════════════════════════════ */
+.sr {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.8s cubic-bezier(0.22,1,0.36,1),
+              transform 0.8s cubic-bezier(0.22,1,0.36,1);
+}
+
+/* Only hide if JS has had a chance to set up */
+.sr-js-ready .sr {
+  opacity: 0;
+  transform: translateY(36px);
+}
+
+.sr-visible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* ── Day mode — theme-aware prose sections ────────────────────── */
+/* Sections that SHOULD follow the theme (not hardcoded dark) */
+html.day .theme-section {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+html.day .theme-card {
+  background: var(--bg-card);
+  border-color: rgba(var(--cr-fog) / 0.08);
+}
+html.day .theme-divider {
+  background: linear-gradient(to right, transparent, rgba(120,75,35,0.3), transparent);
+}
+
+/* ── Day mode specific fixes ──────────────────────────────────── */
+html.day .wood-line-h {
+  background: linear-gradient(to right, transparent, rgba(120,75,35,0.25), transparent);
+}
+html.day ::-webkit-scrollbar-track { background: #f3efe8; }
+html.day ::-webkit-scrollbar-thumb { background: #784b23; }
+html.day ::selection { background: #784b23; color: #fcfbf9; }
