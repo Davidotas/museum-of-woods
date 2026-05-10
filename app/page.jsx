@@ -10,6 +10,7 @@ import Nav from './components/Nav'
 import CartSidebar from './components/CartSidebar'
 import { products } from './data/products'
 import { useCartStore } from './store/cart'
+import { useThemeStore } from './store/theme'
 import { StarIcon } from './components/Icons'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -66,24 +67,25 @@ const COMMUNITY_IMGS = [
   P('photoroom_022_20251125_183809.jpeg'), P('photoroom_009_20251125_153606.jpeg'),
 ]
 
-// ─── Styles shared ──────────────────────────────────────────────────
-const S = {
-  amber:     '#c9a27e',
-  amberDark: '#b5732a',
-  bg:        '#0f1510',
-  card:      '#1a2318',
-  imgBg:     '#141c12',
-  white95:   'rgba(255,255,255,0.95)',
-  white80:   'rgba(255,255,255,0.80)',
-  white50:   'rgba(255,255,255,0.50)',
-  white30:   'rgba(255,255,255,0.30)',
-  white12:   'rgba(255,255,255,0.12)',
-  white06:   'rgba(255,255,255,0.06)',
-}
-
 export default function Home() {
   const heroRef = useRef(null)
   const addItem = useCartStore(s => s.addItem)
+  const isDay   = useThemeStore(s => s.isDay)
+
+  // ─── Theme-reactive styles ───────────────────────────────────────
+  const S = {
+    amber:     isDay ? '#6e3c14' : '#c9a27e',
+    amberDark: isDay ? '#5a2d0c' : '#b5732a',
+    bg:        isDay ? '#ffffff' : '#0f1510',
+    card:      isDay ? '#f5f5f5' : '#1a2318',
+    imgBg:     isDay ? '#e0dcd6' : '#141c12',
+    white95:   isDay ? 'rgba(10,10,10,0.95)'  : 'rgba(255,255,255,0.95)',
+    white80:   isDay ? 'rgba(10,10,10,0.80)'  : 'rgba(255,255,255,0.80)',
+    white50:   isDay ? 'rgba(10,10,10,0.50)'  : 'rgba(255,255,255,0.50)',
+    white30:   isDay ? 'rgba(10,10,10,0.30)'  : 'rgba(255,255,255,0.30)',
+    white12:   isDay ? 'rgba(10,10,10,0.08)'  : 'rgba(255,255,255,0.12)',
+    white06:   isDay ? 'rgba(10,10,10,0.04)'  : 'rgba(255,255,255,0.06)',
+  }
 
   useEffect(() => {
     const lenis = initLenis()
@@ -176,7 +178,7 @@ export default function Home() {
         {/* ══════════════════════════════════════════════════
             MARQUEE TICKER
         ══════════════════════════════════════════════════ */}
-        <div className="relative z-10 py-4 overflow-hidden" style={{ background: '#141c12', borderTop: '1px solid rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+        <div className="relative z-10 py-4 overflow-hidden" style={{ background: S.imgBg, borderTop: `1px solid ${S.white06}`, borderBottom: `1px solid ${S.white06}` }}>
           <div className="flex animate-marquee whitespace-nowrap">
             {[...MARQUEE, ...MARQUEE].map((item, i) => (
               <span key={i} className="font-sans text-[11px] tracking-[.28em] uppercase mx-8 shrink-0" style={{ color: S.amber, opacity: 0.65 }}>{item}</span>
@@ -295,7 +297,7 @@ export default function Home() {
         {/* ══════════════════════════════════════════════════
             TRUST BAR
         ══════════════════════════════════════════════════ */}
-        <div className="relative z-10 py-16 px-6 md:px-14" style={{ background: '#141c12', borderTop: `1px solid ${S.white06}`, borderBottom: `1px solid ${S.white06}` }}>
+        <div className="relative z-10 py-16 px-6 md:px-14" style={{ background: S.card, borderTop: `1px solid ${S.white06}`, borderBottom: `1px solid ${S.white06}` }}>
           <div className="max-w-screen-xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10">
             {[
               { icon: '🌳', title: 'FSC Certified Wood', sub: 'Every species sustainably sourced' },
@@ -343,7 +345,7 @@ export default function Home() {
         {/* ══════════════════════════════════════════════════
             HOW IT WORKS — step cards
         ══════════════════════════════════════════════════ */}
-        <section className="relative z-10 py-28 px-6 md:px-14" style={{ background: '#141c12' }}>
+        <section className="relative z-10 py-28 px-6 md:px-14" style={{ background: S.card }}>
           <div className="max-w-screen-xl mx-auto">
             <div className="text-center mb-20 sr">
               <span className="font-sans text-[10px] tracking-[.4em] uppercase block mb-4" style={{ color: S.amber }}>How It Works</span>
@@ -432,7 +434,7 @@ export default function Home() {
             </video>
             <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, transparent, rgba(15,21,16,0.9))' }} />
           </div>
-          <div className="order-1 lg:order-2 flex flex-col justify-center px-10 md:px-16 py-20 sr" style={{ background: '#141c12' }}>
+          <div className="order-1 lg:order-2 flex flex-col justify-center px-10 md:px-16 py-20 sr" style={{ background: S.card }}>
             <span className="font-sans text-[10px] tracking-[.4em] uppercase block mb-5" style={{ color: S.amber }}>For Creators & Businesses</span>
             <h2 className="font-serif leading-[1.05] mb-6" style={{ fontSize: 'clamp(2rem,4vw,3.5rem)', color: S.white95 }}>
               Turn a £15 piece<br />of wood into a<br />
@@ -528,7 +530,7 @@ export default function Home() {
         {/* ══════════════════════════════════════════════════
             TESTIMONIALS — card grid
         ══════════════════════════════════════════════════ */}
-        <section className="relative z-10 py-28 px-6 md:px-14" style={{ background: '#141c12' }}>
+        <section className="relative z-10 py-28 px-6 md:px-14" style={{ background: S.card }}>
           <div className="max-w-screen-xl mx-auto">
             <div className="flex items-end justify-between mb-16 sr">
               <div>
@@ -549,7 +551,7 @@ export default function Home() {
                       <StarIcon key={j} size={13} className="text-amber" filled />
                     ))}
                   </div>
-                  <p className="font-serif leading-relaxed italic mb-6" style={{ fontSize: '0.98rem', color: 'rgba(255,255,255,0.7)' }}>
+                  <p className="font-serif leading-relaxed italic mb-6" style={{ fontSize: '0.98rem', color: S.white80 }}>
                     "{t.text}"
                   </p>
                   <div className="flex items-center justify-between pt-5" style={{ borderTop: `1px solid ${S.white06}` }}>
@@ -635,7 +637,7 @@ export default function Home() {
         {/* ══════════════════════════════════════════════════
             FOOTER
         ══════════════════════════════════════════════════ */}
-        <footer className="relative z-10 px-8 md:px-14 py-20" style={{ background: '#0a100c', borderTop: `1px solid ${S.white06}` }}>
+        <footer className="relative z-10 px-8 md:px-14 py-20" style={{ background: S.imgBg, borderTop: `1px solid ${S.white06}` }}>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-16">
             <div className="col-span-2 md:col-span-1">
               <img src="/images/logo.svg" alt="Museum of Woods" className="h-14 w-auto object-contain mb-5"
@@ -673,8 +675,8 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8" style={{ borderTop: `1px solid ${S.white06}` }}>
-            <span className="font-sans text-[10px]" style={{ color: 'rgba(255,255,255,0.12)' }}>FSC Certified · Sustainable · Carbon Offset Shipping</span>
-            <span className="font-sans text-[10px]" style={{ color: 'rgba(255,255,255,0.12)' }}>© 2025 Museum of Woods · All rights reserved.</span>
+            <span className="font-sans text-[10px]" style={{ color: S.white30 }}>FSC Certified · Sustainable · Carbon Offset Shipping</span>
+            <span className="font-sans text-[10px]" style={{ color: S.white30 }}>© 2025 Museum of Woods · All rights reserved.</span>
           </div>
         </footer>
 

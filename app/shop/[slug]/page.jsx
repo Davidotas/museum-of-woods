@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { gsap } from 'gsap'
 import { products } from '../../data/products'
 import { useCartStore } from '../../store/cart'
+import { useThemeStore } from '../../store/theme'
 import Nav from '../../components/Nav'
 
 export default function ProductPage() {
@@ -13,6 +14,7 @@ export default function ProductPage() {
   const router = useRouter()
   const product = products.find(p => p.slug === slug || p.id === Number(slug))
   const { addItem } = useCartStore()
+  const isDay = useThemeStore(s => s.isDay)
   const [activeImg, setActiveImg] = useState(0)
   const [engravingText, setEngravingText] = useState('')
   const [added, setAdded] = useState(false)
@@ -28,7 +30,7 @@ export default function ProductPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0f1510' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
         <div className="text-center">
           <p className="mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>Product not found</p>
           <Link href="/shop" className="text-amber text-sm underline">Back to shop</Link>
@@ -46,7 +48,7 @@ export default function ProductPage() {
   const relatedProducts = products.filter(p => p.id !== product.id && p.category === product.category).slice(0, 3)
 
   return (
-    <div className="min-h-screen" style={{ background: '#0f1510', color: '#f5f0e8' }}>
+    <div className="min-h-screen" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       <Nav />
 
       {/* Breadcrumb */}
@@ -66,7 +68,7 @@ export default function ProductPage() {
 
           {/* Images */}
           <div ref={heroRef}>
-            <div className="relative aspect-square rounded-2xl overflow-hidden mb-4" style={{ background: '#141c12' }}>
+            <div className="relative aspect-square rounded-2xl overflow-hidden mb-4" style={{ background: 'var(--bg-card)' }}>
               <img
                 src={product.images?.[activeImg] || product.image}
                 alt={product.name}
@@ -132,7 +134,7 @@ export default function ProductPage() {
             </div>
 
             {/* Specs */}
-            <div className="grid grid-cols-2 gap-4 p-4 bg-bark/15 rounded-xl mb-8 text-sm">
+            <div className="grid grid-cols-2 gap-4 p-4 rounded-xl mb-8 text-sm" style={{ background: 'var(--bg-secondary)' }}>
               <div>
                 <span className="text-fog/30 text-xs uppercase tracking-widest block mb-1">Dimensions</span>
                 <span className="text-fog/70">{product.dimensions}</span>
@@ -163,7 +165,8 @@ export default function ProductPage() {
                   placeholder="Enter names, dates, coordinates, quotes..."
                   rows={3}
                   maxLength={150}
-                  className="w-full bg-bark/20 border border-fog/10 rounded-xl px-4 py-3 text-fog/70 text-sm placeholder-fog/25 outline-none focus:border-amber/30 resize-none transition-colors"
+                  className="w-full border rounded-xl px-4 py-3 text-sm outline-none resize-none transition-colors focus:border-amber/30"
+                  style={{ background: 'var(--bg-secondary)', borderColor: 'rgba(var(--cr-fog)/0.12)', color: 'var(--text-muted)' }}
                 />
                 <p className="text-fog/25 text-xs mt-1">{engravingText.length}/150 characters</p>
               </div>
@@ -206,7 +209,7 @@ export default function ProductPage() {
           <div className="grid md:grid-cols-3 gap-6">
             {relatedProducts.map(p => (
               <Link key={p.id} href={`/shop/${p.slug}`} className="group">
-                <div className="aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-bark/20">
+                <div className="aspect-[4/3] rounded-xl overflow-hidden mb-3" style={{ background: 'var(--bg-secondary)' }}>
                   <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 </div>
                 <h3 className="font-serif text-fog/80 group-hover:text-amber transition-colors">{p.name}</h3>

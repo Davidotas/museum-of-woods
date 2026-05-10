@@ -483,9 +483,8 @@ html.day .theme-toggle-thumb {
 .border-pulse { animation: border-pulse 2.5s ease-in-out infinite; }
 
 /* ── Smooth image load ────────────────────────────────────────── */
-img { transition: opacity 0.5s ease; }
-img[loading] { opacity: 0; }
-img.loaded   { opacity: 1; }
+/* NOTE: do NOT hide images via img[loading] — it hides lazy images permanently */
+img { transition: opacity 0.4s ease; }
 
 /* ── Hover underline slide ────────────────────────────────────── */
 .underline-slide { position: relative; }
@@ -520,6 +519,12 @@ img.loaded   { opacity: 1; }
 .sr-visible {
   opacity: 1 !important;
   transform: translateY(0) !important;
+}
+
+/* ── Day mode body background ────────────────────────────────── */
+html.day body {
+  background-color: #ffffff;
+  color: #0a0a0a;
 }
 
 /* ── Day mode — theme-aware prose sections ────────────────────── */
