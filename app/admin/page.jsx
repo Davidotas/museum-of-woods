@@ -425,9 +425,6 @@ export default function AdminPage() {
               Enter dashboard →
             </button>
           </div>
-          <p className="font-sans text-[10px] text-center mt-4" style={{ color: 'rgba(245,242,236,0.2)' }}>
-            Hint: museum2024
-          </p>
         </div>
       </div>
     )

@@ -174,12 +174,6 @@ export default function SignInPage() {
               </button>
             </form>
 
-            {/* Demo hint */}
-            <div className="mt-6 p-4 rounded-lg" style={{ background: 'var(--bg-card)', border: '1px solid rgba(var(--cr-fog) / 0.08)' }}>
-              <p className="font-sans text-[11px] mb-1" style={{ color: 'var(--text-subtle)' }}>Admin demo credentials:</p>
-              <p className="font-mono text-[11px]" style={{ color: 'var(--accent)' }}>admin@museumofwoods.co · museum2024</p>
-            </div>
-
             <p className="font-sans text-[10px] text-center mt-6" style={{ color: 'var(--text-subtle)' }}>
               By signing in you agree to our{' '}
               <Link href="/terms" className="underline underline-offset-2">Terms</Link>
