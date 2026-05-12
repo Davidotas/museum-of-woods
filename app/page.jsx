@@ -207,10 +207,10 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
             {/* Large card — col 1-7 */}
             {featuredProducts[0] && (
-              <Link href={`/shop/${featuredProducts[0].slug}`} className="md:col-span-7 group relative overflow-hidden sr" style={{ animationDelay: '0ms' }}>
+              <Link href={`/shop/${featuredProducts[0].slug}`} className="md:col-span-7 group relative overflow-hidden">
                 <div className="relative overflow-hidden" style={{ aspectRatio: '16/10', background: S.imgBg }}>
                   <img src={featuredProducts[0].image} alt={featuredProducts[0].name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="eager" />
                   <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 55%)' }} />
                   {featuredProducts[0].bestseller && (
                     <span className="absolute top-5 left-5 font-sans text-[9px] tracking-[.2em] uppercase px-3 py-1.5" style={{ background: S.amber, color: '#0f1510' }}>Bestseller</span>
@@ -233,10 +233,10 @@ export default function Home() {
             {/* Right column — 2 stacked */}
             <div className="md:col-span-5 grid grid-rows-2 gap-4">
               {featuredProducts.slice(1, 3).map((p, i) => (
-                <Link key={p.id} href={`/shop/${p.slug}`} className="group relative overflow-hidden sr" style={{ animationDelay: `${(i + 1) * 80}ms` }}>
+                <Link key={p.id} href={`/shop/${p.slug}`} className="group relative overflow-hidden">
                   <div className="relative overflow-hidden" style={{ aspectRatio: '4/3', background: S.imgBg }}>
                     <img src={p.image} alt={p.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="eager" />
                     <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%)' }} />
                     <div className="absolute bottom-0 left-0 right-0 p-5 flex items-end justify-between">
                       <div>
@@ -254,10 +254,10 @@ export default function Home() {
           {/* Bottom row — 3 equal cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
             {featuredProducts.slice(3, 6).map((p, i) => (
-              <div key={p.id} className="group sr" style={{ animationDelay: `${(i + 3) * 70}ms`, background: S.card, borderRadius: '16px', overflow: 'hidden' }}>
+              <div key={p.id} className="group" style={{ background: S.card, borderRadius: '16px', overflow: 'hidden' }}>
                 <div className="relative overflow-hidden" style={{ aspectRatio: '4/3', background: S.imgBg }}>
                   <img src={p.image} alt={p.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="eager" />
                   {p.bestseller && (
                     <span className="absolute top-3 left-3 font-sans text-[8px] tracking-[.15em] uppercase px-2.5 py-1" style={{ background: S.amber, color: '#0f1510' }}>Bestseller</span>
                   )}
@@ -476,8 +476,7 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {allProducts.map((p, i) => (
               <Link key={p.id} href={`/shop/${p.slug}`}
-                className="group sr"
-                data-delay={(i % 4) * 50}>
+                className="group">
                 <div className="relative overflow-hidden rounded-2xl mb-4" style={{ aspectRatio: '4/5', background: S.imgBg }}>
                   <img src={p.images?.[1] || p.image} alt={p.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
