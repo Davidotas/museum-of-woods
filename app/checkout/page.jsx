@@ -289,7 +289,7 @@ export default function CheckoutPage() {
                 <span>📦</span><span>Tracked delivery</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-fog/30">
-                <span>✦</span><span>Handcrafted in London</span>
+                <span>✦</span><span>Handcrafted Worldwide</span>
               </div>
             </div>
           </div>

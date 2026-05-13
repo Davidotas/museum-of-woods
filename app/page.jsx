@@ -74,7 +74,7 @@ export default function Home() {
 
   // ─── Theme-reactive styles ───────────────────────────────────────
   const S = {
-    amber:     isDay ? '#6e3c14' : '#c9a27e',
+    amber:     isDay ? '#6e3c14' : '#dcb991',
     amberDark: isDay ? '#5a2d0c' : '#b5732a',
     bg:        isDay ? '#ffffff' : '#0f1510',
     card:      isDay ? '#f5f5f5' : '#1a2318',
@@ -137,7 +137,7 @@ export default function Home() {
           <div className="relative z-10 px-8 md:px-16 pb-16 md:pb-24 w-full max-w-screen-xl">
             <div className="hero-anim mb-5">
               <span className="font-sans text-[11px] tracking-[.35em] uppercase" style={{ color: S.amber }}>
-                Est. 2024 · London · Laser-Engraved by Hand
+                Est. 2024 · Worldwide · Laser-Engraved by Hand
               </span>
             </div>
             <h1 className="hero-anim font-serif leading-[0.95] mb-8"
@@ -642,9 +642,9 @@ export default function Home() {
               <img src="/images/logo.svg" alt="Museum of Woods" className="h-14 w-auto object-contain mb-5"
                 style={{ filter: 'brightness(0) invert(1)', opacity: 0.8 }} />
               <p className="font-sans text-xs leading-loose mb-4" style={{ color: S.white30 }}>
-                Where wood becomes memory.<br />Precision laser-engraved objects<br />crafted in London.
+                Where wood becomes memory.<br />Precision laser-engraved objects<br />shipped worldwide.
               </p>
-              <span className="font-sans text-[10px]" style={{ color: 'rgba(201,162,126,0.5)' }}>🇬🇧 Made in London</span>
+              <span className="font-sans text-[10px]" style={{ color: 'rgba(220,185,145,0.5)' }}>🌍 Ships Worldwide</span>
             </div>
 
             {[

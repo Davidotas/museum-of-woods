@@ -61,7 +61,7 @@ export default function SignInPage() {
                 "Every piece carries the fingerprint of its maker and the memory of its owner."
               </blockquote>
               <p className="font-sans text-sm" style={{ color: 'rgba(245,242,236,0.4)' }}>
-                — Museum of Woods, London
+                — Museum of Woods
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -69,7 +69,7 @@ export default function SignInPage() {
                 style={{ background: 'rgba(201,162,126,0.15)', border: '1px solid rgba(201,162,126,0.2)' }}>🌳</div>
               <div>
                 <p className="font-sans text-xs font-medium" style={{ color: 'rgba(245,242,236,0.8)' }}>500+ Pieces crafted</p>
-                <p className="font-sans text-[10px]" style={{ color: 'rgba(245,242,236,0.35)' }}>Laser-engraved in London since 2024</p>
+                <p className="font-sans text-[10px]" style={{ color: 'rgba(245,242,236,0.35)' }}>Laser-engraved worldwide since 2024</p>
               </div>
             </div>
           </div>

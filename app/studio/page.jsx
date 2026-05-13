@@ -423,7 +423,7 @@ function StepSize({ product, value, onChange }) {
   return (
     <div>
       <h2 className="font-serif text-2xl mb-1.5" style={{ color: '#f5f2ec' }}>Choose Size</h2>
-      <p className="font-sans text-xs mb-6" style={{ color: 'rgba(245,242,236,0.4)' }}>Larger pieces have more detail. All sizes are hand-finished in London.</p>
+      <p className="font-sans text-xs mb-6" style={{ color: 'rgba(245,242,236,0.4)' }}>Larger pieces have more detail. All sizes are hand-finished to order.</p>
       <div className="grid grid-cols-2 gap-3">
         {sizes.map((s, i) => (
           <button

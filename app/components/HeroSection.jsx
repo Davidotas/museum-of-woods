@@ -49,7 +49,7 @@ export default function HeroSection() {
           <span
             className="line-inner block font-sans text-xs tracking-[0.4em] uppercase text-amber/70"
           >
-            Est. 2024 · London
+            Est. 2024 · Worldwide
           </span>
         </div>
 

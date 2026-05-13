@@ -196,7 +196,7 @@ export default function ProductPage() {
             <div className="flex flex-wrap gap-4 mt-6 text-xs text-fog/30 tracking-wider uppercase">
               <span>🔒 Secure checkout</span>
               <span>📦 Free UK delivery over £80</span>
-              <span>✦ Handcrafted in London</span>
+              <span>✦ Handcrafted Worldwide</span>
             </div>
           </div>
         </div>

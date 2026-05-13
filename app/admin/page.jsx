@@ -466,6 +466,7 @@ export default function AdminPage() {
     { id: 'products', label: 'Products', icon: '📦' },
     { id: 'orders',   label: 'Orders',   icon: '🛒' },
     { id: 'customers',label: 'Customers',icon: '👥' },
+    { id: 'payment',  label: 'Payment',  icon: '💳' },
     { id: 'settings', label: 'Settings', icon: '⚙️' },
   ]
 
@@ -763,6 +764,105 @@ export default function AdminPage() {
               </div>
             )}
 
+            {/* ── PAYMENT TAB ── */}
+            {tab === 'payment' && (
+              <div className="max-w-2xl space-y-8">
+                {/* Payment Methods */}
+                <div>
+                  <h3 className="font-serif text-xl mb-1" style={{ color: '#f5f2ec' }}>Payment Methods</h3>
+                  <p className="font-sans text-xs mb-6" style={{ color: 'rgba(245,242,236,0.35)' }}>Configure how customers pay. All methods are collected manually — no gateway required.</p>
+
+                  {[
+                    { id: 'bank', label: '🏦 Bank Transfer (UK)', active: true },
+                    { id: 'paypal', label: '🅿️ PayPal', active: true },
+                    { id: 'whatsapp', label: '📱 WhatsApp Payment', active: true },
+                    { id: 'crypto', label: '₿ Crypto (USDT / BTC)', active: false },
+                  ].map(m => (
+                    <div key={m.id} className="flex items-center justify-between px-5 py-4 rounded-xl mb-3"
+                      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,242,236,0.07)' }}>
+                      <span className="font-sans text-sm" style={{ color: '#f5f2ec' }}>{m.label}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="font-sans text-[10px] uppercase tracking-widest" style={{ color: m.active ? '#4ade80' : 'rgba(245,242,236,0.25)' }}>
+                          {m.active ? 'Active' : 'Inactive'}
+                        </span>
+                        <button className="px-4 py-1.5 rounded-lg font-sans text-[10px] tracking-widest uppercase transition-all hover:opacity-80"
+                          style={{ background: m.active ? 'rgba(220,38,38,0.15)' : 'rgba(220,185,145,0.15)', color: m.active ? '#f87171' : '#dcb991' }}
+                          onClick={() => showToast(`${m.label} ${m.active ? 'disabled' : 'enabled'}`)}>
+                          {m.active ? 'Disable' : 'Enable'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bank Transfer Details */}
+                <div>
+                  <h4 className="font-sans text-[11px] tracking-[.25em] uppercase mb-4" style={{ color: 'rgba(245,242,236,0.4)' }}>UK Bank Transfer Details</h4>
+                  <div className="space-y-4 p-5 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,242,236,0.07)' }}>
+                    {[
+                      { label: 'Account Name',  value: 'Museum of Woods Ltd' },
+                      { label: 'Sort Code',      value: '20-00-00' },
+                      { label: 'Account Number', value: '12345678' },
+                      { label: 'Bank Name',      value: 'Barclays Bank' },
+                      { label: 'IBAN (International)', value: 'GB29BARC20000012345678' },
+                      { label: 'BIC / SWIFT',   value: 'BARCGB22' },
+                    ].map(f => (
+                      <div key={f.label}>
+                        <label className="font-sans text-[10px] tracking-[.2em] uppercase block mb-1.5" style={{ color: 'rgba(245,242,236,0.35)' }}>{f.label}</label>
+                        <input type="text" defaultValue={f.value} className="w-full px-4 py-3 rounded-lg font-sans text-sm outline-none"
+                          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,242,236,0.08)', color: '#f5f2ec' }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* PayPal & International */}
+                <div>
+                  <h4 className="font-sans text-[11px] tracking-[.25em] uppercase mb-4" style={{ color: 'rgba(245,242,236,0.4)' }}>PayPal & International Payments</h4>
+                  <div className="space-y-4 p-5 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,242,236,0.07)' }}>
+                    {[
+                      { label: 'PayPal Email',   value: 'pay@museumofwoods.co' },
+                      { label: 'PayPal.me Link', value: 'paypal.me/museumofwoods' },
+                      { label: 'WhatsApp Number',value: '+44 7XXX XXXXXX' },
+                    ].map(f => (
+                      <div key={f.label}>
+                        <label className="font-sans text-[10px] tracking-[.2em] uppercase block mb-1.5" style={{ color: 'rgba(245,242,236,0.35)' }}>{f.label}</label>
+                        <input type="text" defaultValue={f.value} className="w-full px-4 py-3 rounded-lg font-sans text-sm outline-none"
+                          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,242,236,0.08)', color: '#f5f2ec' }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Currencies accepted */}
+                <div>
+                  <h4 className="font-sans text-[11px] tracking-[.25em] uppercase mb-4" style={{ color: 'rgba(245,242,236,0.4)' }}>Currencies Accepted</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { flag: '🇬🇧', code: 'GBP', name: 'British Pound',    on: true  },
+                      { flag: '🇺🇸', code: 'USD', name: 'US Dollar',        on: true  },
+                      { flag: '🇨🇦', code: 'CAD', name: 'Canadian Dollar',  on: true  },
+                      { flag: '🇳🇬', code: 'NGN', name: 'Nigerian Naira',   on: true  },
+                      { flag: '🇪🇺', code: 'EUR', name: 'Euro',             on: true  },
+                      { flag: '🌍', code: 'OTHER','name': 'All others (GBP)', on: true },
+                    ].map(c => (
+                      <div key={c.code} className="flex items-center justify-between px-4 py-3 rounded-xl"
+                        style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${c.on ? 'rgba(220,185,145,0.2)' : 'rgba(245,242,236,0.06)'}` }}>
+                        <span className="font-sans text-sm" style={{ color: '#f5f2ec' }}>{c.flag} {c.code}</span>
+                        <span className="font-sans text-[10px]" style={{ color: 'rgba(245,242,236,0.4)' }}>{c.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button className="px-8 py-3.5 font-sans text-xs tracking-[.18em] uppercase rounded-xl transition-all hover:opacity-90"
+                  style={{ background: '#dcb991', color: '#0f1510' }}
+                  onClick={() => showToast('Payment settings saved!')}>
+                  Save Payment Settings
+                </button>
+              </div>
+            )}
+
             {/* ── SETTINGS TAB ── */}
             {tab === 'settings' && (
               <div className="max-w-lg space-y-6">
@@ -780,7 +880,7 @@ export default function AdminPage() {
                   </div>
                 ))}
                 <button className="px-8 py-3.5 font-sans text-xs tracking-[.18em] uppercase rounded-xl transition-all hover:opacity-90"
-                  style={{ background: '#c9a27e', color: '#0f1510' }}
+                  style={{ background: '#dcb991', color: '#0f1510' }}
                   onClick={() => showToast('Settings saved!')}>
                   Save settings
                 </button>

@@ -13,7 +13,7 @@
   /* RGB channels — used by Tailwind opacity modifiers */
   --cr-forest:   15 21 16;       /* #0f1510 very dark green bg    */
   --cr-bark:     26 35 24;       /* #1a2318 dark green panels     */
-  --cr-amber:    201 162 126;    /* #c9a27e warm gold accents     */
+  --cr-amber:    220 185 145;    /* #dcb991 light warm gold       */
   --cr-grain:    232 213 183;    /* #e8d5b7 tan borders           */
   --cr-moss:     61 90 62;       /* #3d5a3e medium green          */
   --cr-fog:      245 242 236;    /* #f5f2ec bright off-white text */
@@ -26,7 +26,7 @@
   /* Hex aliases kept for non-Tailwind usage */
   --color-forest:   #0f1510;
   --color-bark:     #1a2318;
-  --color-amber:    #c9a27e;
+  --color-amber:    #dcb991;
   --color-grain:    #e8d5b7;
   --color-fog:      #f5f2ec;
   --color-fog2:     #c8c4bc;
@@ -41,7 +41,7 @@
   --text-primary: #f5f2ec;
   --text-muted:   #c8c4bc;
   --text-subtle:  #888880;
-  --accent:       #c9a27e;
+  --accent:       #dcb991;
 
   /* Three.js scene bg */
   --scene-bg: 0x0f1510;
@@ -55,7 +55,7 @@
   --nav-bg-top:      rgba(13,20,16,0.55);
   --nav-bg-scrolled: rgba(13,20,16,0.96);
   --nav-text:        rgba(245,242,236,0.75);
-  --nav-text-active: #c9a27e;
+  --nav-text-active: #dcb991;
   --nav-border:      rgba(201,162,126,0.08);
   --nav-mobile-bg:   rgba(10,16,12,0.98);
 }
@@ -100,7 +100,7 @@ html.day {
   --nav-bg-top:      rgba(5,5,5,0.75);
   --nav-bg-scrolled: rgba(5,5,5,0.97);
   --nav-text:        rgba(255,255,255,0.78);
-  --nav-text-active: #c9a27e;
+  --nav-text-active: #dcb991;
   --nav-border:      rgba(255,255,255,0.06);
   --nav-mobile-bg:   rgba(5,5,5,0.99);
 }

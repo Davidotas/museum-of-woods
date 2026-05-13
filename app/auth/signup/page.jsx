@@ -112,7 +112,7 @@ export default function SignUpPage() {
               ))}
             </div>
             <p className="font-sans text-xs" style={{ color: 'rgba(245,242,236,0.3)' }}>
-              Museum of Woods · London · Est. 2024
+              Museum of Woods · Global · Est. 2024
             </p>
           </div>
         </div>

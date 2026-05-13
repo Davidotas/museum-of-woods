@@ -84,7 +84,7 @@ export default function CTASection() {
       {/* Bottom footer strip */}
       <div className="absolute bottom-10 left-8 md:left-14 right-8 md:right-14 flex items-center justify-between">
         <span className="font-sans text-[10px] tracking-[0.25em] text-fog/20 uppercase">
-          Museum of Woods · London
+          Museum of Woods · Global
         </span>
         <span className="font-sans text-[10px] tracking-[0.25em] text-fog/20">
           © 2024

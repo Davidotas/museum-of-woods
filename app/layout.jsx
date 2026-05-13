@@ -4,8 +4,8 @@ import CurrencyProvider from './components/CurrencyProvider'
 export const metadata = {
   title: 'Museum of Woods — Precision Engraved Wood Objects',
   description:
-    'Where wood becomes memory. Precision laser-engraved objects crafted in London. Each piece carries a story that outlasts its maker.',
-  keywords: 'laser engraved wood, personalised wood gifts, wooden signs, soundwave art, memorial wood, custom engraving UK',
+    'Where wood becomes memory. Precision laser-engraved objects shipped worldwide. Each piece carries a story that outlasts its maker.',
+  keywords: 'laser engraved wood, personalised wood gifts, wooden signs, soundwave art, memorial wood, custom engraving, worldwide shipping',
   openGraph: {
     title: 'Museum of Woods',
     description: 'Where wood becomes memory.',
