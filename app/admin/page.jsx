@@ -132,7 +132,7 @@ function ProductForm({ product, onSave, onCancel, dynamicCategories = [] }) {
   const setFeature = (i, v) => setForm(f => { const arr = [...(f.features || [])]; arr[i] = v; return { ...f, features: arr } })
   const removeFeature = (i) => setForm(f => ({ ...f, features: (f.features || []).filter((_, idx) => idx !== i) }))
 
-  const CATEGORIES = dynamicCategories.filter(c => c.id !== 'all').map(c => c.id)
+  const CATEGORIES = dynamicCategories.filter(c => c.id !== 'all')
   const DIFFICULTIES = ['signature', 'premium', 'heritage']
   const EMOTIONS = ['love', 'memory', 'achievement', 'gratitude', 'identity']
   const WOODS = ['oak', 'walnut', 'maple', 'cherry', 'ash', 'birch', 'ebony', 'teak', 'bamboo']
@@ -317,7 +317,7 @@ function ProductForm({ product, onSave, onCancel, dynamicCategories = [] }) {
                   <select value={form.category} onChange={e => set('category', e.target.value)}
                     className="w-full px-4 py-3 rounded-lg font-sans text-sm outline-none appearance-none"
                     style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,242,236,0.08)', color: '#f5f2ec' }}>
-                    {CATEGORIES.map(c => <option key={c} value={c} style={{ background: '#1a2318' }}>{c}</option>)}
+                    {CATEGORIES.map(c => <option key={c.id} value={c.id} style={{ background: '#1a2318' }}>{c.label}</option>)}
                   </select>
                 </div>
                 {/* Difficulty */}
@@ -558,10 +558,14 @@ export default function AdminPage() {
     o.product.toLowerCase().includes(orderSearch.toLowerCase())
   )
 
-  const saveProduct = (form) => {
+  const saveProduct = async (form) => {
     if (editing === 'new') {
-      addProduct({ ...form, image: form.images?.[0] || '' })
-      showToast('Product created!')
+      const { dbOk } = await addProduct({ ...form, image: form.images?.[0] || '' })
+      if (dbOk) {
+        showToast('Product created and saved!')
+      } else {
+        showToast('Product saved locally — will sync when connection restores', 'warn')
+      }
     } else {
       storeUpdateProduct(form.id, { ...form, image: form.images?.[0] || form.image })
       showToast('Product updated!')
@@ -642,9 +646,12 @@ export default function AdminPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed top-6 right-6 z-[200] px-5 py-3.5 rounded-xl shadow-2xl font-sans text-sm flex items-center gap-2.5 transition-all"
-          style={{ background: toast.type === 'error' ? '#dc2626' : '#c9a27e', color: '#0f1510' }}>
-          {toast.type === 'error' ? '⚠️' : '✓'} {toast.msg}
+        <div className="fixed top-6 right-6 z-[200] px-5 py-3.5 rounded-xl shadow-2xl font-sans text-sm flex items-center gap-2.5 transition-all max-w-sm"
+          style={{
+            background: toast.type === 'error' ? '#dc2626' : toast.type === 'warn' ? '#d97706' : '#c9a27e',
+            color: '#fff'
+          }}>
+          {toast.type === 'error' ? '⚠️' : toast.type === 'warn' ? '⚡' : '✓'} {toast.msg}
         </div>
       )}
 
@@ -886,9 +893,20 @@ export default function AdminPage() {
             {/* ── CATEGORIES TAB ── */}
             {tab === 'categories' && (
               <div className="max-w-2xl">
-                <p className="font-sans text-xs mb-6" style={{ color: 'rgba(245,242,236,0.35)' }}>
-                  Categories appear as filters on the Shop page. The <strong style={{ color: 'rgba(245,242,236,0.6)' }}>All</strong> category is built-in and cannot be removed.
-                </p>
+                <div className="flex items-center justify-between mb-6">
+                  <p className="font-sans text-xs" style={{ color: 'rgba(245,242,236,0.35)' }}>
+                    Categories appear as filters on the Shop page. The <strong style={{ color: 'rgba(245,242,236,0.6)' }}>All</strong> category is built-in and cannot be removed.
+                  </p>
+                  {!catEditing && (
+                    <button
+                      onClick={() => { setCatEditing('new'); setCatInput('') }}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg font-sans text-xs tracking-[.15em] uppercase transition-all hover:opacity-90 shrink-0 ml-4"
+                      style={{ background: '#c9a27e', color: '#0f1510' }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                      New Category
+                    </button>
+                  )}
+                </div>
 
                 {/* Add / Edit inline form */}
                 {catEditing && (

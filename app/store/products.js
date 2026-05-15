@@ -15,23 +15,25 @@ const safeStorage = createJSONStorage(() =>
 
 // Map DB row → app product shape
 const fromDB = (row) => ({
-  id:           String(row.id),
-  slug:         slugify(row.name),
-  name:         row.name,
-  price:        Number(row.price),
-  description:  row.description  || '',
-  category:     row.category     || 'gifts',
-  images:       Array.isArray(row.images) ? row.images : [],
-  image:        Array.isArray(row.images) && row.images.length ? row.images[0] : '',
-  badge:        row.badge        || null,
-  woodType:     row.wood_type    || null,
-  size:         row.size         || null,
-  leadTime:     row.lead_time    || null,
-  rating:       Number(row.rating)  || 5,
-  reviews:      Number(row.reviews) || 0,
-  featured:     Boolean(row.featured),
-  bestseller:   Boolean(row.featured),
-  createdAt:    row.created_at,
+  id:              String(row.id),
+  slug:            slugify(row.name),
+  name:            row.name,
+  price:           Number(row.price),
+  description:     row.description  || '',
+  category:        row.category     || 'gifts',
+  images:          Array.isArray(row.images) ? row.images : [],
+  image:           Array.isArray(row.images) && row.images.length ? row.images[0] : '',
+  badge:           row.badge        || null,
+  woodType:        row.wood_type    || null,
+  size:            row.size         || null,
+  leadTime:        row.lead_time    || null,
+  rating:          Number(row.rating)  || 5,
+  reviews:         Number(row.reviews) || 0,
+  featured:        Boolean(row.featured),
+  bestseller:      Boolean(row.featured),
+  createdAt:       row.created_at,
+  stripeProductId: row.stripe_product_id || null,
+  stripePriceId:   row.stripe_price_id   || null,
 })
 
 export const useProductStore = create(
@@ -52,19 +54,38 @@ export const useProductStore = create(
           const { products: dbProducts }   = await pRes.json()
           const { categories: dbCats }     = await cRes.json()
 
-          // DB products keyed by id (string) take priority over seed
-          const dbIds = new Set((dbProducts || []).map(p => String(p.id)))
-          const merged = [
-            ...seedProducts.filter(p => !dbIds.has(String(p.id))),
-            ...(dbProducts || []).map(fromDB),
-          ]
+          const dbIds   = new Set((dbProducts || []).map(p => String(p.id)))
+          const seedIds = new Set(seedProducts.map(p => String(p.id)))
 
-          // Categories: seed built-ins + DB custom ones (no duplicates)
-          const seedCatIds = new Set(seedCategories.map(c => c.id))
-          const mergedCats = [
-            ...seedCategories,
-            ...(dbCats || []).filter(c => !seedCatIds.has(c.id)).map(c => ({ id: c.id, label: c.label })),
-          ]
+          // Products in localStorage that are NOT in DB and NOT seeds
+          // → staff added them but DB save may have failed; rescue them
+          const { products: currentProducts } = get()
+          const localOnly = (currentProducts || []).filter(
+            p => !dbIds.has(String(p.id)) && !seedIds.has(String(p.id))
+          )
+
+          // Auto-sync rescued products back to DB (fire and forget)
+          localOnly.forEach(p => {
+            fetch('/api/products', {
+              method:  'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body:    JSON.stringify(p),
+            }).catch(() => {/* silent — will retry next load */})
+          })
+
+          // Build merged list: DB products only + rescued locals
+          // Do NOT merge seedProducts — if staff cleared the DB, respect that
+          const seen   = new Set()
+          const merged = [
+            ...(dbProducts || []).map(fromDB),
+            ...localOnly,
+          ].filter(p => { const k = String(p.id); if (seen.has(k)) return false; seen.add(k); return true })
+
+          // Categories: DB is source of truth
+          // The "All" filter is always added client-side in the UI, not stored in DB
+          const mergedCats = (dbCats || []).length > 0
+            ? (dbCats || []).map(c => ({ id: c.id, label: c.label }))
+            : seedCategories   // only fall back to seeds if DB has zero categories
 
           set({ products: merged, categories: mergedCats, loaded: true })
         } catch (err) {
@@ -88,7 +109,8 @@ export const useProductStore = create(
         // Optimistic update (immediately visible everywhere)
         set(s => ({ products: [...s.products, product] }))
 
-        // Persist to DB
+        // Persist to DB — return error so caller can surface it
+        let dbOk = false
         try {
           const res = await fetch('/api/products', {
             method:  'POST',
@@ -96,8 +118,10 @@ export const useProductStore = create(
             body:    JSON.stringify(product),
           })
           if (!res.ok) throw new Error(await res.text())
+          dbOk = true
         } catch (err) {
           console.error('addProduct DB error:', err.message)
+          // Product stays in localStorage — fetchAll will auto-sync it next load
         }
 
         // Sync to Stripe (non-blocking — don't fail if Stripe errors)
@@ -130,7 +154,7 @@ export const useProductStore = create(
           console.warn('Stripe sync skipped:', err.message)
         }
 
-        return product
+        return { product, dbOk }
       },
 
       updateProduct: async (id, updates) => {

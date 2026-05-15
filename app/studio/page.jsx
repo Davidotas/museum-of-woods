@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Nav from '../components/Nav'
 import CartSidebar from '../components/CartSidebar'
 import Price from '../components/Price'
+import { useCurrencyStore } from '../store/currency'
 import { materials } from '../data/materials'
 import { useCartStore } from '../store/cart'
 
@@ -353,6 +354,7 @@ function WoodPreview({ product, wood, size, text1, text2, style, finish }) {
 /* ─── Step Components ───────────────────────────────────── */
 
 function StepProduct({ value, onChange }) {
+  const format = useCurrencyStore(s => s.format)
   return (
     <div>
       <h2 className="font-serif text-2xl mb-1.5" style={{ color: '#f5f2ec' }}>Choose Product Type</h2>
@@ -374,7 +376,7 @@ function StepProduct({ value, onChange }) {
               {pt.label}
             </span>
             <span className="font-sans text-[10px]" style={{ color: 'rgba(201,162,126,0.6)' }}>
-              from £{pt.base}
+              from {format(pt.base)}
             </span>
           </button>
         ))}
@@ -384,6 +386,7 @@ function StepProduct({ value, onChange }) {
 }
 
 function StepWood({ value, onChange }) {
+  const format = useCurrencyStore(s => s.format)
   return (
     <div>
       <h2 className="font-serif text-2xl mb-1.5" style={{ color: '#f5f2ec' }}>Choose Wood Species</h2>
@@ -407,7 +410,7 @@ function StepWood({ value, onChange }) {
               <div className="font-sans text-[10px] mt-0.5" style={{ color: 'rgba(245,242,236,0.35)' }}>{w.grain}</div>
             </div>
             <div className="font-sans text-xs shrink-0" style={{ color: '#c9a27e' }}>
-              {w.price > 0 ? `+£${w.price}` : 'Included'}
+              {w.price > 0 ? `+${format(w.price)}` : 'Included'}
             </div>
           </button>
         ))}
@@ -417,7 +420,8 @@ function StepWood({ value, onChange }) {
 }
 
 function StepSize({ product, value, onChange }) {
-  const sizes = product?.sizes || ['30×20cm', '40×28cm', '60×40cm']
+  const format   = useCurrencyStore(s => s.format)
+  const sizes    = product?.sizes || ['30×20cm', '40×28cm', '60×40cm']
   const priceMap = { 0: 0, 1: 15, 2: 30, 3: 45 }
 
   return (
@@ -443,7 +447,7 @@ function StepSize({ product, value, onChange }) {
             }} />
             <span className="font-sans text-sm font-medium mt-2" style={{ color: '#f5f2ec' }}>{s}</span>
             <span className="font-sans text-[10px]" style={{ color: 'rgba(201,162,126,0.7)' }}>
-              {priceMap[i] ? `+£${priceMap[i]}` : 'Base price'}
+              {priceMap[i] ? `+${format(priceMap[i])}` : 'Base price'}
             </span>
           </button>
         ))}
@@ -779,6 +783,7 @@ function StepStyle({ value, onChange }) {
 }
 
 function StepFinish({ value, onChange }) {
+  const format = useCurrencyStore(s => s.format)
   return (
     <div>
       <h2 className="font-serif text-2xl mb-1.5" style={{ color: '#f5f2ec' }}>Surface Finish</h2>
@@ -803,7 +808,7 @@ function StepFinish({ value, onChange }) {
               <div className="font-sans text-[10px] mt-0.5" style={{ color: 'rgba(245,242,236,0.35)' }}>{f.desc}</div>
             </div>
             <div className="font-sans text-xs shrink-0" style={{ color: '#c9a27e' }}>
-              {f.price > 0 ? `+£${f.price}` : 'Included'}
+              {f.price > 0 ? `+${format(f.price)}` : 'Included'}
             </div>
           </button>
         ))}
@@ -813,6 +818,7 @@ function StepFinish({ value, onChange }) {
 }
 
 function StepExtras({ value, onChange }) {
+  const format = useCurrencyStore(s => s.format)
   const toggle = (extra) => {
     const already = value.find(e => e.id === extra.id)
     onChange(already ? value.filter(e => e.id !== extra.id) : [...value, extra])
@@ -846,7 +852,7 @@ function StepExtras({ value, onChange }) {
                 <div className="font-sans text-[10px] mt-0.5" style={{ color: 'rgba(245,242,236,0.35)' }}>{ex.desc}</div>
               </div>
               <div className="font-sans text-xs shrink-0" style={{ color: '#c9a27e' }}>
-                {ex.price > 0 ? `+£${ex.price}` : 'Free'}
+                {ex.price > 0 ? `+${format(ex.price)}` : 'Free'}
               </div>
             </button>
           )
@@ -857,13 +863,14 @@ function StepExtras({ value, onChange }) {
 }
 
 function StepReview({ product, wood, size, style, finish, extras, text1, text2, total, onAddToCart }) {
+  const format = useCurrencyStore(s => s.format)
   const rows = [
-    { label: product?.label || 'Product', value: `£${product?.base || 0}` },
-    { label: `Wood: ${wood?.name || '—'}`, value: wood?.price > 0 ? `+£${wood.price}` : 'Included' },
-    { label: `Size: ${size?.label || '—'}`, value: size?.extra > 0 ? `+£${size.extra}` : 'Base size' },
-    { label: `Finish: ${finish?.label || '—'}`, value: finish?.price > 0 ? `+£${finish.price}` : 'Included' },
-    ...(text1 ? [{ label: 'Engraving text', value: '+£15' }] : []),
-    ...extras.map(e => ({ label: e.label, value: `+£${e.price}` })),
+    { label: product?.label || 'Product', value: format(product?.base || 0) },
+    { label: `Wood: ${wood?.name || '—'}`, value: wood?.price > 0 ? `+${format(wood.price)}` : 'Included' },
+    { label: `Size: ${size?.label || '—'}`, value: size?.extra > 0 ? `+${format(size.extra)}` : 'Base size' },
+    { label: `Finish: ${finish?.label || '—'}`, value: finish?.price > 0 ? `+${format(finish.price)}` : 'Included' },
+    ...(text1 ? [{ label: 'Engraving text', value: `+${format(15)}` }] : []),
+    ...extras.map(e => ({ label: e.label, value: `+${format(e.price)}` })),
   ]
 
   return (

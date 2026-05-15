@@ -14,8 +14,10 @@ export default function ShopPage() {
   const [justAdded, setJustAdded] = useState(null)
   const addItem    = useCartStore(s => s.addItem)
   const isDay      = useThemeStore(s => s.isDay)
-  const products   = useProductStore(s => s.products)
-  const categories = useProductStore(s => s.categories)
+  const products    = useProductStore(s => s.products)
+  const rawCats     = useProductStore(s => s.categories)
+  // Always prepend "All" filter — it's UI-only, not stored in DB
+  const categories  = [{ id: 'all', label: 'All' }, ...rawCats.filter(c => c.id !== 'all')]
 
   const filtered = activeCategory === 'all'
     ? products

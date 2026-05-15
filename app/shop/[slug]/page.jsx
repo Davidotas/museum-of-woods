@@ -7,12 +7,15 @@ import { gsap } from 'gsap'
 import { useProductStore } from '../../store/products'
 import { useCartStore } from '../../store/cart'
 import { useThemeStore } from '../../store/theme'
+import { useCurrencyStore } from '../../store/currency'
 import Nav from '../../components/Nav'
+import Price from '../../components/Price'
 
 export default function ProductPage() {
   const { slug }    = useParams()
   const isDay       = useThemeStore(s => s.isDay)
   const { addItem } = useCartStore()
+  const format      = useCurrencyStore(s => s.format)
 
   // Pull from the live store (includes DB products) — wait for load
   const products    = useProductStore(s => s.products)
@@ -139,11 +142,11 @@ export default function ProductPage() {
 
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-8">
-              <span className="font-serif text-3xl" style={{ color: 'var(--accent)' }}>£{product.price}</span>
+              <Price gbp={product.price} className="font-serif text-3xl" style={{ color: 'var(--accent)' }} />
               {product.originalPrice > product.price && (
                 <>
-                  <span className="line-through text-lg" style={{ color: 'var(--text-subtle)' }}>£{product.originalPrice}</span>
-                  <span className="text-sm text-green-500">Save £{product.originalPrice - product.price}</span>
+                  <Price gbp={product.originalPrice} className="line-through text-lg" style={{ color: 'var(--text-subtle)' }} />
+                  <span className="text-sm text-green-500">Save {format(product.originalPrice - product.price)}</span>
                 </>
               )}
             </div>
@@ -202,7 +205,7 @@ export default function ProductPage() {
               <button onClick={handleAdd}
                 className="flex-1 py-4 rounded-xl font-sans text-sm tracking-widest uppercase transition-all duration-500"
                 style={{ background: added ? '#16a34a' : 'var(--accent)', color: '#fff' }}>
-                {added ? '✓ Added to Cart' : `Add to Cart — £${product.price}`}
+                {added ? '✓ Added to Cart' : `Add to Cart — ${format(product.price)}`}
               </button>
               <Link href="/checkout"
                 className="px-6 py-4 rounded-xl font-sans text-sm tracking-widest uppercase transition-all duration-300 whitespace-nowrap"
@@ -215,7 +218,7 @@ export default function ProductPage() {
 
             <div className="flex flex-wrap gap-4 mt-6 font-sans text-xs tracking-wider uppercase" style={{ color: 'var(--text-subtle)' }}>
               <span>🔒 Secure checkout</span>
-              <span>📦 Free UK delivery over £80</span>
+              <span>📦 Free delivery on orders over {format(80)}</span>
               <span>✦ Handcrafted worldwide</span>
             </div>
           </div>
@@ -235,7 +238,7 @@ export default function ProductPage() {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 </div>
                 <h3 className="font-serif transition-colors group-hover:text-amber" style={{ color: 'var(--text-primary)' }}>{p.name}</h3>
-                <p className="font-sans text-sm mt-1" style={{ color: 'var(--accent)' }}>£{p.price}</p>
+                <Price gbp={p.price} className="font-sans text-sm mt-1" style={{ color: 'var(--accent)' }} />
               </Link>
             ))}
           </div>
