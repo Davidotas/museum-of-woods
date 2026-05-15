@@ -9,12 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^9.5.0",
     "@studio-freight/lenis": "^1.0.42",
+    "@supabase/supabase-js": "^2.105.4",
+    "bcryptjs": "^3.0.3",
     "gsap": "^3.12.5",
     "lucide-react": "^1.14.0",
     "next": "14.2.5",
+    "next-auth": "^4.24.14",
     "react": "^18",
     "react-dom": "^18",
+    "stripe": "^22.1.1",
     "three": "^0.166.1",
     "zustand": "^5.0.12"
   },

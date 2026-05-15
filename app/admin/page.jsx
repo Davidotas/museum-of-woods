@@ -2,7 +2,9 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import Link from 'next/link'
-import { products as initialProducts } from '../data/products'
+import { useProductStore } from '../store/products'
+import { useSettingsStore } from '../store/settings'
+import { useCurrencyStore, SEED_RATES } from '../store/currency'
 
 const PASS = 'museum2024'
 const MAX_IMAGES = 15
@@ -47,7 +49,7 @@ function StatusBadge({ status }) {
 }
 
 /* ── Product Form (add/edit) with 15-image support ─────────── */
-function ProductForm({ product, onSave, onCancel }) {
+function ProductForm({ product, onSave, onCancel, dynamicCategories = [] }) {
   const isNew = !product?.id
   const [form, setForm] = useState(product ? { ...product } : {
     name: '', slug: '', tagline: '', price: '', originalPrice: '',
@@ -93,7 +95,7 @@ function ProductForm({ product, onSave, onCancel }) {
   const setFeature = (i, v) => setForm(f => { const arr = [...(f.features || [])]; arr[i] = v; return { ...f, features: arr } })
   const removeFeature = (i) => setForm(f => ({ ...f, features: (f.features || []).filter((_, idx) => idx !== i) }))
 
-  const CATEGORIES = ['gifts', 'home', 'business', 'art', 'custom']
+  const CATEGORIES = dynamicCategories.filter(c => c.id !== 'all').map(c => c.id)
   const DIFFICULTIES = ['signature', 'premium', 'heritage']
   const EMOTIONS = ['love', 'memory', 'achievement', 'gratitude', 'identity']
   const WOODS = ['oak', 'walnut', 'maple', 'cherry', 'ash', 'birch', 'ebony', 'teak', 'bamboo']
@@ -374,14 +376,37 @@ export default function AdminPage() {
   const [pass, setPass]           = useState('')
   const [passErr, setPassErr]     = useState(false)
   const passRef                   = useRef(null)
+  const {
+    products,
+    categories: storeCategories,
+    addProduct,
+    updateProduct: storeUpdateProduct,
+    deleteProduct: storeDeleteProduct,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+  } = useProductStore()
+
+  const { whatsappNumber, update: updateSetting } = useSettingsStore()
+  const {
+    currency: activeCurrency,
+    forcedKey,
+    rates,
+    setForcedCurrency,
+    updateRate,
+    resetRates,
+  } = useCurrencyStore()
+
   const [tab, setTab]             = useState('products')
-  const [products, setProducts]   = useState(initialProducts)
   const [editing, setEditing]     = useState(null) // product obj or 'new'
   const [search, setSearch]       = useState('')
   const [filterCat, setFilterCat] = useState('all')
   const [toast, setToast]         = useState(null)
   const [orders, setOrders]       = useState(MOCK_ORDERS)
   const [orderSearch, setOrderSearch] = useState('')
+  // Category management
+  const [catEditing, setCatEditing] = useState(null) // { id, label } or 'new'
+  const [catInput, setCatInput]     = useState('')
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type })
@@ -443,18 +468,36 @@ export default function AdminPage() {
 
   const saveProduct = (form) => {
     if (editing === 'new') {
-      setProducts(prev => [...prev, { ...form, id: Date.now(), image: form.images?.[0] || '' }])
+      addProduct({ ...form, image: form.images?.[0] || '' })
       showToast('Product created!')
     } else {
-      setProducts(prev => prev.map(p => p.id === form.id ? { ...form, image: form.images?.[0] || p.image } : p))
+      storeUpdateProduct(form.id, { ...form, image: form.images?.[0] || form.image })
       showToast('Product updated!')
     }
     setEditing(null)
   }
 
   const deleteProduct = (id) => {
-    setProducts(prev => prev.filter(p => p.id !== id))
+    storeDeleteProduct(id)
     showToast('Product deleted', 'error')
+  }
+
+  const saveCategory = () => {
+    if (!catInput.trim()) return
+    if (catEditing === 'new') {
+      addCategory(catInput.trim())
+      showToast('Category created!')
+    } else if (catEditing) {
+      updateCategory(catEditing.id, catInput.trim())
+      showToast('Category updated!')
+    }
+    setCatEditing(null)
+    setCatInput('')
+  }
+
+  const removeCat = (id) => {
+    deleteCategory(id)
+    showToast('Category deleted', 'error')
   }
 
   const updateOrderStatus = (id, status) => {
@@ -463,14 +506,16 @@ export default function AdminPage() {
   }
 
   const TABS = [
-    { id: 'products', label: 'Products', icon: '📦' },
-    { id: 'orders',   label: 'Orders',   icon: '🛒' },
-    { id: 'customers',label: 'Customers',icon: '👥' },
-    { id: 'payment',  label: 'Payment',  icon: '💳' },
-    { id: 'settings', label: 'Settings', icon: '⚙️' },
+    { id: 'products',   label: 'Products',   icon: '📦' },
+    { id: 'categories', label: 'Categories', icon: '🏷️' },
+    { id: 'orders',     label: 'Orders',     icon: '🛒' },
+    { id: 'customers',  label: 'Customers',  icon: '👥' },
+    { id: 'currency',   label: 'Currency',   icon: '💱' },
+    { id: 'payment',    label: 'Payment',    icon: '💳' },
+    { id: 'settings',   label: 'Settings',   icon: '⚙️' },
   ]
 
-  const CATS = ['all', 'gifts', 'home', 'business', 'art', 'custom']
+  const CATS = storeCategories.map(c => c.id)
 
   return (
     <>
@@ -480,6 +525,7 @@ export default function AdminPage() {
           product={editing === 'new' ? null : editing}
           onSave={saveProduct}
           onCancel={() => setEditing(null)}
+          dynamicCategories={storeCategories}
         />
       )}
 
@@ -546,6 +592,14 @@ export default function AdminPage() {
                 style={{ background: '#c9a27e', color: '#0f1510' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
                 Add Product
+              </button>
+            )}
+            {tab === 'categories' && (
+              <button onClick={() => { setCatEditing('new'); setCatInput('') }}
+                className="flex items-center gap-2 px-5 py-2.5 font-sans text-xs tracking-[.15em] uppercase rounded-lg transition-all hover:opacity-90"
+                style={{ background: '#c9a27e', color: '#0f1510' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                Add Category
               </button>
             )}
           </div>
@@ -678,6 +732,94 @@ export default function AdminPage() {
                     </p>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* ── CATEGORIES TAB ── */}
+            {tab === 'categories' && (
+              <div className="max-w-2xl">
+                <p className="font-sans text-xs mb-6" style={{ color: 'rgba(245,242,236,0.35)' }}>
+                  Categories appear as filters on the Shop page. The <strong style={{ color: 'rgba(245,242,236,0.6)' }}>All</strong> category is built-in and cannot be removed.
+                </p>
+
+                {/* Add / Edit inline form */}
+                {catEditing && (
+                  <div className="flex gap-3 mb-6 p-4 rounded-xl" style={{ background: 'rgba(220,185,145,0.07)', border: '1px solid rgba(220,185,145,0.2)' }}>
+                    <input
+                      type="text"
+                      autoFocus
+                      value={catInput}
+                      onChange={e => setCatInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') saveCategory(); if (e.key === 'Escape') { setCatEditing(null); setCatInput('') } }}
+                      placeholder={catEditing === 'new' ? 'New category name…' : 'Edit category name…'}
+                      className="flex-1 px-4 py-2.5 rounded-lg font-sans text-sm outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(220,185,145,0.3)', color: '#f5f2ec' }}
+                    />
+                    <button onClick={saveCategory}
+                      className="px-5 py-2.5 rounded-lg font-sans text-xs tracking-[.15em] uppercase transition-all hover:opacity-90"
+                      style={{ background: '#dcb991', color: '#0f1510' }}>
+                      {catEditing === 'new' ? 'Create' : 'Save'}
+                    </button>
+                    <button onClick={() => { setCatEditing(null); setCatInput('') }}
+                      className="px-4 py-2.5 rounded-lg font-sans text-xs tracking-[.15em] uppercase transition-all"
+                      style={{ border: '1px solid rgba(245,242,236,0.1)', color: 'rgba(245,242,236,0.4)' }}>
+                      Cancel
+                    </button>
+                  </div>
+                )}
+
+                {/* Category list */}
+                <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(245,242,236,0.06)' }}>
+                  {storeCategories.map((cat, i) => (
+                    <div key={cat.id} className="flex items-center justify-between px-5 py-4 transition-colors"
+                      style={{
+                        background: i % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent',
+                        borderBottom: i < storeCategories.length - 1 ? '1px solid rgba(245,242,236,0.04)' : 'none',
+                      }}>
+                      <div className="flex items-center gap-3">
+                        <span className="w-8 h-8 rounded-lg flex items-center justify-center font-sans text-[11px]"
+                          style={{ background: 'rgba(220,185,145,0.1)', color: '#dcb991' }}>
+                          🏷️
+                        </span>
+                        <div>
+                          <p className="font-sans text-sm font-medium" style={{ color: '#f5f2ec' }}>{cat.label}</p>
+                          <p className="font-sans text-[10px] mt-0.5" style={{ color: 'rgba(245,242,236,0.3)' }}>
+                            ID: {cat.id} · {products.filter(p => p.category === cat.id).length} products
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {cat.id !== 'all' && (
+                          <>
+                            <button
+                              onClick={() => { setCatEditing(cat); setCatInput(cat.label) }}
+                              className="px-3 py-1.5 rounded-lg font-sans text-[11px] transition-all hover:opacity-80"
+                              style={{ background: 'rgba(201,162,126,0.12)', color: '#c9a27e' }}>
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => removeCat(cat.id)}
+                              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:opacity-80"
+                              style={{ background: 'rgba(220,38,38,0.1)' }}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5">
+                                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+                              </svg>
+                            </button>
+                          </>
+                        )}
+                        {cat.id === 'all' && (
+                          <span className="font-sans text-[10px] px-2.5 py-1 rounded-full" style={{ background: 'rgba(107,114,128,0.15)', color: 'rgba(245,242,236,0.3)' }}>
+                            Built-in
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="font-sans text-[11px] mt-4" style={{ color: 'rgba(245,242,236,0.25)' }}>
+                  💡 Deleting a category moves its products to the Gifts category automatically.
+                </p>
               </div>
             )}
 
@@ -816,14 +958,45 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                {/* PayPal & International */}
+                {/* WhatsApp — live wired */}
                 <div>
-                  <h4 className="font-sans text-[11px] tracking-[.25em] uppercase mb-4" style={{ color: 'rgba(245,242,236,0.4)' }}>PayPal & International Payments</h4>
+                  <h4 className="font-sans text-[11px] tracking-[.25em] uppercase mb-2" style={{ color: 'rgba(245,242,236,0.4)' }}>WhatsApp Business Number</h4>
+                  <p className="font-sans text-[11px] mb-4 leading-relaxed" style={{ color: 'rgba(245,242,236,0.28)' }}>
+                    Customers who choose "Send on WhatsApp" at checkout will message this number with their order details pre-filled.
+                    Use international format, e.g. <span style={{ color: 'rgba(245,242,236,0.5)' }}>+447911123456</span>
+                  </p>
+                  <div className="flex gap-3 items-center p-5 rounded-xl" style={{ background: 'rgba(37,211,102,0.05)', border: '1px solid rgba(37,211,102,0.15)' }}>
+                    <span className="text-2xl shrink-0">💬</span>
+                    <div className="flex-1">
+                      <label className="font-sans text-[10px] tracking-[.2em] uppercase block mb-1.5" style={{ color: 'rgba(245,242,236,0.35)' }}>WhatsApp Number</label>
+                      <input
+                        type="tel"
+                        value={whatsappNumber}
+                        onChange={e => updateSetting('whatsappNumber', e.target.value)}
+                        placeholder="+447911123456"
+                        className="w-full px-4 py-3 rounded-lg font-sans text-sm outline-none"
+                        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(37,211,102,0.25)', color: '#f5f2ec' }}
+                      />
+                    </div>
+                    <a
+                      href={`https://wa.me/${whatsappNumber.replace(/[\s\-()]/g,'')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 px-4 py-3 rounded-lg font-sans text-xs tracking-widest uppercase transition-all hover:opacity-90"
+                      style={{ background: '#25d366', color: '#fff' }}
+                    >
+                      Test
+                    </a>
+                  </div>
+                </div>
+
+                {/* PayPal */}
+                <div>
+                  <h4 className="font-sans text-[11px] tracking-[.25em] uppercase mb-4" style={{ color: 'rgba(245,242,236,0.4)' }}>PayPal Details</h4>
                   <div className="space-y-4 p-5 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,242,236,0.07)' }}>
                     {[
                       { label: 'PayPal Email',   value: 'pay@museumofwoods.co' },
                       { label: 'PayPal.me Link', value: 'paypal.me/museumofwoods' },
-                      { label: 'WhatsApp Number',value: '+44 7XXX XXXXXX' },
                     ].map(f => (
                       <div key={f.label}>
                         <label className="font-sans text-[10px] tracking-[.2em] uppercase block mb-1.5" style={{ color: 'rgba(245,242,236,0.35)' }}>{f.label}</label>
@@ -855,11 +1028,151 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <button className="px-8 py-3.5 font-sans text-xs tracking-[.18em] uppercase rounded-xl transition-all hover:opacity-90"
-                  style={{ background: '#dcb991', color: '#0f1510' }}
-                  onClick={() => showToast('Payment settings saved!')}>
-                  Save Payment Settings
-                </button>
+                <div className="flex items-center gap-3">
+                  <button className="px-8 py-3.5 font-sans text-xs tracking-[.18em] uppercase rounded-xl transition-all hover:opacity-90"
+                    style={{ background: '#dcb991', color: '#0f1510' }}
+                    onClick={() => showToast('Payment settings saved! WhatsApp number is live.')}>
+                    Save Payment Settings
+                  </button>
+                  <p className="font-sans text-[11px]" style={{ color: 'rgba(245,242,236,0.25)' }}>
+                    WhatsApp number saves instantly as you type.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* ── CURRENCY TAB ── */}
+            {tab === 'currency' && (
+              <div className="max-w-3xl space-y-8">
+
+                {/* Live currency display */}
+                <div className="flex items-center justify-between p-5 rounded-xl"
+                  style={{ background: 'rgba(220,185,145,0.07)', border: '1px solid rgba(220,185,145,0.2)' }}>
+                  <div>
+                    <p className="font-sans text-[10px] tracking-[.25em] uppercase mb-1" style={{ color: 'rgba(245,242,236,0.4)' }}>Active Currency</p>
+                    <p className="font-serif text-2xl" style={{ color: '#f5f2ec' }}>
+                      {activeCurrency.symbol} {activeCurrency.code}
+                      <span className="font-sans text-sm ml-2" style={{ color: 'rgba(245,242,236,0.4)' }}>{activeCurrency.name}</span>
+                    </p>
+                    <p className="font-sans text-[11px] mt-1" style={{ color: 'rgba(245,242,236,0.3)' }}>
+                      {forcedKey ? `🔒 Forced to ${activeCurrency.code} by admin` : '🌍 Auto-detected from visitor location'}
+                    </p>
+                  </div>
+                  {forcedKey && (
+                    <button onClick={() => { setForcedCurrency(null); showToast('Restored auto-detection') }}
+                      className="px-4 py-2 rounded-lg font-sans text-xs tracking-widest uppercase transition-all hover:opacity-80"
+                      style={{ border: '1px solid rgba(245,242,236,0.15)', color: 'rgba(245,242,236,0.5)' }}>
+                      Reset to Auto
+                    </button>
+                  )}
+                </div>
+
+                {/* Force a currency */}
+                <div>
+                  <h3 className="font-serif text-xl mb-1" style={{ color: '#f5f2ec' }}>Force Currency for All Visitors</h3>
+                  <p className="font-sans text-xs mb-4" style={{ color: 'rgba(245,242,236,0.35)' }}>
+                    Override geo-detection and show one currency to everyone. Leave on Auto to show local currency per country.
+                  </p>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                    <button
+                      onClick={() => { setForcedCurrency(null); showToast('Restored auto-detection') }}
+                      className="flex flex-col items-center gap-1 p-3 rounded-xl transition-all border"
+                      style={{
+                        background: !forcedKey ? 'rgba(220,185,145,0.12)' : 'rgba(255,255,255,0.03)',
+                        borderColor: !forcedKey ? '#dcb991' : 'rgba(245,242,236,0.07)',
+                      }}>
+                      <span className="text-lg">🌍</span>
+                      <span className="font-sans text-[10px] uppercase tracking-widest" style={{ color: !forcedKey ? '#dcb991' : 'rgba(245,242,236,0.4)' }}>Auto</span>
+                    </button>
+                    {Object.entries(rates).map(([key, c]) => (
+                      <button key={key}
+                        onClick={() => { setForcedCurrency(key); showToast(`Currency forced to ${c.code}`) }}
+                        className="flex flex-col items-center gap-1 p-3 rounded-xl transition-all border"
+                        style={{
+                          background: forcedKey === key ? 'rgba(220,185,145,0.12)' : 'rgba(255,255,255,0.03)',
+                          borderColor: forcedKey === key ? '#dcb991' : 'rgba(245,242,236,0.07)',
+                        }}>
+                        <span className="font-sans text-sm font-medium" style={{ color: forcedKey === key ? '#dcb991' : '#f5f2ec' }}>
+                          {c.symbol}
+                        </span>
+                        <span className="font-sans text-[10px] uppercase tracking-widest" style={{ color: forcedKey === key ? '#dcb991' : 'rgba(245,242,236,0.4)' }}>
+                          {c.code}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Exchange rates editor */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-serif text-xl" style={{ color: '#f5f2ec' }}>Exchange Rates</h3>
+                      <p className="font-sans text-xs mt-1" style={{ color: 'rgba(245,242,236,0.35)' }}>
+                        All rates are relative to GBP (£1 = X currency). Updates apply live instantly.
+                      </p>
+                    </div>
+                    <button onClick={() => { resetRates(); showToast('Rates reset to defaults') }}
+                      className="px-4 py-2 rounded-lg font-sans text-xs tracking-widest uppercase transition-all hover:opacity-80"
+                      style={{ border: '1px solid rgba(245,242,236,0.1)', color: 'rgba(245,242,236,0.45)' }}>
+                      Reset to defaults
+                    </button>
+                  </div>
+
+                  <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(245,242,236,0.06)' }}>
+                    <table className="w-full">
+                      <thead>
+                        <tr style={{ background: 'rgba(0,0,0,0.3)', borderBottom: '1px solid rgba(245,242,236,0.05)' }}>
+                          {['Currency', 'Code', 'Symbol', '£1 GBP =', 'Example (£89)'].map(h => (
+                            <th key={h} className="px-4 py-3 text-left font-sans text-[10px] tracking-[.2em] uppercase"
+                              style={{ color: 'rgba(245,242,236,0.3)' }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(rates).map(([key, c], i) => (
+                          <tr key={key}
+                            style={{ background: i % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent', borderBottom: '1px solid rgba(245,242,236,0.04)' }}>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                {forcedKey === key && <span className="w-1.5 h-1.5 rounded-full bg-amber shrink-0" />}
+                                <span className="font-sans text-sm" style={{ color: '#f5f2ec' }}>{c.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 font-mono text-xs" style={{ color: '#dcb991' }}>{c.code}</td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                value={c.symbol}
+                                onChange={e => updateRate(key, 'symbol', e.target.value)}
+                                className="w-14 px-2 py-1.5 rounded font-sans text-sm text-center outline-none"
+                                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(245,242,236,0.08)', color: '#f5f2ec' }}
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={c.rate}
+                                onChange={e => updateRate(key, 'rate', e.target.value)}
+                                disabled={key === 'GB'}
+                                className="w-24 px-2 py-1.5 rounded font-sans text-sm outline-none disabled:opacity-40"
+                                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(245,242,236,0.08)', color: '#f5f2ec' }}
+                              />
+                            </td>
+                            <td className="px-4 py-3 font-sans text-sm" style={{ color: 'rgba(245,242,236,0.55)' }}>
+                              {c.symbol}{(89 * c.rate).toLocaleString('en', { minimumFractionDigits: c.rate >= 500 ? 0 : 2, maximumFractionDigits: c.rate >= 500 ? 0 : 2 })}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="font-sans text-[11px] mt-3" style={{ color: 'rgba(245,242,236,0.25)' }}>
+                    💡 Rates save instantly as you type. Refresh the site to see changes take effect for auto-detected visitors.
+                  </p>
+                </div>
+
               </div>
             )}
 

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#0f1510"/>
+  <!-- Wood grain lines -->
+  <line x1="6" y1="11" x2="26" y2="11" stroke="#1a2318" stroke-width="1"/>
+  <line x1="6" y1="15" x2="26" y2="15" stroke="#1a2318" stroke-width="0.6"/>
+  <line x1="6" y1="19" x2="26" y2="19" stroke="#1a2318" stroke-width="1"/>
+  <!-- M mark in amber -->
+  <path d="M7 24V9l9 11L25 9v15" stroke="#dcb991" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

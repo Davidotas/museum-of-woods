@@ -1,5 +1,5 @@
 import './globals.css'
-import CurrencyProvider from './components/CurrencyProvider'
+import Providers from './components/Providers'
 
 export const metadata = {
   title: 'Museum of Woods — Precision Engraved Wood Objects',
@@ -36,7 +36,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body><CurrencyProvider>{children}</CurrencyProvider></body>
+      <body><Providers>{children}</Providers></body>
     </html>
   )
 }

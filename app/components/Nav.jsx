@@ -62,6 +62,7 @@ export default function Nav() {
   const [scrolled, setScrolled]     = useState(false)
   const [activeDD, setActiveDD]     = useState(null) // which dropdown is open
   const { count, toggleCart }       = useCartStore()
+  const isDay                       = useThemeStore(s => s.isDay)
   const ddTimer = useRef(null)
 
   useEffect(() => {
@@ -84,9 +85,13 @@ export default function Nav() {
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
         style={{
           height: 'var(--nav-h)',
-          background: scrolled ? 'rgba(13,20,16,0.96)' : 'rgba(13,20,16,0.55)',
+          background: scrolled
+            ? (isDay ? 'rgba(255,255,255,0.97)' : 'rgba(13,20,16,0.96)')
+            : (isDay ? 'rgba(255,255,255,0.82)' : 'rgba(13,20,16,0.55)'),
           backdropFilter: scrolled ? 'blur(16px)' : 'blur(8px)',
-          borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
+          borderBottom: scrolled
+            ? `1px solid ${isDay ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.06)'}`
+            : 'none',
         }}
       >
         <div className="max-w-screen-xl mx-auto px-6 md:px-10 h-full flex items-center justify-between">
@@ -111,9 +116,11 @@ export default function Nav() {
                 <Link
                   href={item.href}
                   className="flex items-center gap-1 font-sans text-[11px] tracking-[.18em] uppercase px-4 py-2 rounded-lg transition-all duration-300"
-                  style={{ color: pathname.startsWith(item.href) ? '#c9a27e' : 'rgba(255,255,255,0.75)' }}
-                  onMouseEnter={e => { if (!pathname.startsWith(item.href)) e.currentTarget.style.color = '#ffffff'; openDD(item.label) }}
-                  onMouseLeave={e => { if (!pathname.startsWith(item.href)) e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; closeDD() }}
+                  style={{ color: pathname.startsWith(item.href)
+                    ? (isDay ? '#a86f2a' : '#c9a27e')
+                    : (isDay ? 'rgba(20,20,20,0.68)' : 'rgba(255,255,255,0.75)') }}
+                  onMouseEnter={e => { if (!pathname.startsWith(item.href)) e.currentTarget.style.color = isDay ? '#1a1a1a' : '#ffffff'; openDD(item.label) }}
+                  onMouseLeave={e => { if (!pathname.startsWith(item.href)) e.currentTarget.style.color = isDay ? 'rgba(20,20,20,0.68)' : 'rgba(255,255,255,0.75)'; closeDD() }}
                 >
                   {item.label}
                   {item.dropdown && (
@@ -160,20 +167,20 @@ export default function Nav() {
             <Link
               href="/auth/signin"
               className="hidden md:inline-flex items-center font-sans text-[10px] tracking-[.15em] uppercase transition-colors duration-300"
-              style={{ color: 'rgba(255,255,255,0.5)' }}
-              onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.85)'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
+              style={{ color: isDay ? 'rgba(20,20,20,0.45)' : 'rgba(255,255,255,0.5)' }}
+              onMouseEnter={e => e.currentTarget.style.color = isDay ? 'rgba(20,20,20,0.85)' : 'rgba(255,255,255,0.85)'}
+              onMouseLeave={e => e.currentTarget.style.color = isDay ? 'rgba(20,20,20,0.45)' : 'rgba(255,255,255,0.5)'}
             >
               Sign in
             </Link>
 
-            {/* Cart — white icon */}
+            {/* Cart icon */}
             <button
               onClick={toggleCart}
               className="relative flex items-center gap-2 transition-colors duration-300 p-1"
-              style={{ color: 'rgba(255,255,255,0.6)' }}
-              onMouseEnter={e => e.currentTarget.style.color = '#c9a27e'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+              style={{ color: isDay ? 'rgba(20,20,20,0.55)' : 'rgba(255,255,255,0.6)' }}
+              onMouseEnter={e => e.currentTarget.style.color = isDay ? '#a86f2a' : '#c9a27e'}
+              onMouseLeave={e => e.currentTarget.style.color = isDay ? 'rgba(20,20,20,0.55)' : 'rgba(255,255,255,0.6)'}
               aria-label="Open cart"
             >
               <CartIcon size={20} />
@@ -184,35 +191,35 @@ export default function Nav() {
               )}
             </button>
 
-            {/* CTA button — amber outline, always visible */}
+            {/* CTA button */}
             <Link
               href="/shop"
               className="hidden md:inline-flex items-center gap-2 font-sans text-[10px] tracking-[.18em] uppercase px-5 py-2 transition-all duration-300"
-              style={{ border: '1px solid rgba(201,162,126,0.5)', color: '#c9a27e' }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#c9a27e'; e.currentTarget.style.color = '#0d1410' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#c9a27e' }}
+              style={{ border: `1px solid ${isDay ? 'rgba(168,111,42,0.45)' : 'rgba(201,162,126,0.5)'}`, color: isDay ? '#a86f2a' : '#c9a27e' }}
+              onMouseEnter={e => { e.currentTarget.style.background = isDay ? '#a86f2a' : '#c9a27e'; e.currentTarget.style.color = '#fff' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = isDay ? '#a86f2a' : '#c9a27e' }}
             >
               Commission
             </Link>
 
-            {/* Hamburger — white lines */}
+            {/* Hamburger */}
             <button
               className="lg:hidden flex flex-col gap-[5px] p-1.5"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Menu"
             >
-              <span className={`block h-px w-6 transition-all duration-300 origin-center ${menuOpen ? 'rotate-45 translate-y-[8px]' : ''}`} style={{ background: 'rgba(255,255,255,0.7)' }} />
-              <span className={`block h-px w-6 transition-all duration-300 ${menuOpen ? 'opacity-0 scale-x-0' : ''}`} style={{ background: 'rgba(255,255,255,0.7)' }} />
-              <span className={`block h-px w-6 transition-all duration-300 origin-center ${menuOpen ? '-rotate-45 -translate-y-[8px]' : ''}`} style={{ background: 'rgba(255,255,255,0.7)' }} />
+              <span className={`block h-px w-6 transition-all duration-300 origin-center ${menuOpen ? 'rotate-45 translate-y-[8px]' : ''}`} style={{ background: isDay ? 'rgba(20,20,20,0.65)' : 'rgba(255,255,255,0.7)' }} />
+              <span className={`block h-px w-6 transition-all duration-300 ${menuOpen ? 'opacity-0 scale-x-0' : ''}`} style={{ background: isDay ? 'rgba(20,20,20,0.65)' : 'rgba(255,255,255,0.7)' }} />
+              <span className={`block h-px w-6 transition-all duration-300 origin-center ${menuOpen ? '-rotate-45 -translate-y-[8px]' : ''}`} style={{ background: isDay ? 'rgba(20,20,20,0.65)' : 'rgba(255,255,255,0.7)' }} />
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Mobile full-screen menu — always dark with white text */}
+      {/* Mobile full-screen menu */}
       <div className={`fixed inset-0 z-40 flex flex-col justify-center px-10 transition-all duration-500 lg:hidden ${
         menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-      }`} style={{ background: 'rgba(10,16,12,0.98)', backdropFilter: 'blur(20px)' }}>
+      }`} style={{ background: isDay ? 'rgba(250,250,248,0.99)' : 'rgba(10,16,12,0.98)', backdropFilter: 'blur(20px)' }}>
         <div className="flex flex-col gap-2">
           {NAV.map(item => (
             <div key={item.label}>
@@ -220,9 +227,9 @@ export default function Nav() {
                 href={item.href}
                 onClick={() => setMenuOpen(false)}
                 className="font-serif text-3xl transition-colors duration-300 block py-2"
-                style={{ color: 'rgba(255,255,255,0.85)' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#c9a27e'}
-                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.85)'}
+                style={{ color: isDay ? 'rgba(10,10,10,0.85)' : 'rgba(255,255,255,0.85)' }}
+                onMouseEnter={e => e.currentTarget.style.color = isDay ? '#a86f2a' : '#c9a27e'}
+                onMouseLeave={e => e.currentTarget.style.color = isDay ? 'rgba(10,10,10,0.85)' : 'rgba(255,255,255,0.85)'}
               >
                 {item.label}
               </Link>
@@ -231,9 +238,9 @@ export default function Nav() {
                   {item.dropdown.map(sub => (
                     <Link key={sub.href} href={sub.href} onClick={() => setMenuOpen(false)}
                       className="font-sans text-xs transition-colors"
-                      style={{ color: 'rgba(255,255,255,0.35)' }}
-                      onMouseEnter={e => e.currentTarget.style.color = 'rgba(201,162,126,0.8)'}
-                      onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
+                      style={{ color: isDay ? 'rgba(10,10,10,0.35)' : 'rgba(255,255,255,0.35)' }}
+                      onMouseEnter={e => e.currentTarget.style.color = isDay ? 'rgba(110,60,20,0.85)' : 'rgba(201,162,126,0.8)'}
+                      onMouseLeave={e => e.currentTarget.style.color = isDay ? 'rgba(10,10,10,0.35)' : 'rgba(255,255,255,0.35)'}
                     >
                       {sub.label}
                     </Link>

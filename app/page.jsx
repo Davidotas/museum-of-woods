@@ -8,7 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { initLenis, destroyLenis } from './lib/scroll'
 import Nav from './components/Nav'
 import CartSidebar from './components/CartSidebar'
-import { products } from './data/products'
+import { useProductStore } from './store/products'
 import { useCartStore } from './store/cart'
 import { useThemeStore } from './store/theme'
 import { StarIcon } from './components/Icons'
@@ -22,8 +22,7 @@ const V1 = 'https://videos.pexels.com/video-files/5895456/5895456-hd_1280_720_30
 const V2 = 'https://videos.pexels.com/video-files/6262756/6262756-hd_1280_720_25fps.mp4'
 const P = (f) => `/images/${f}`
 
-const featuredProducts = products.filter(p => p.bestseller).slice(0, 6)
-const allProducts = products.slice(0, 16)
+// Products loaded dynamically from store inside component
 
 const TESTIMONIALS = [
   { name: 'Amara K.',  city: 'Manchester', stars: 5, product: 'Signal Slice',    text: 'I uploaded my late dad\'s voicemail. His voice, waved into walnut. I\'ve had it on my wall 8 months.' },
@@ -68,14 +67,17 @@ const COMMUNITY_IMGS = [
 ]
 
 export default function Home() {
-  const heroRef = useRef(null)
-  const addItem = useCartStore(s => s.addItem)
-  const isDay   = useThemeStore(s => s.isDay)
+  const heroRef     = useRef(null)
+  const addItem     = useCartStore(s => s.addItem)
+  const isDay       = useThemeStore(s => s.isDay)
+  const allStoreProducts  = useProductStore(s => s.products)
+  const featuredProducts  = allStoreProducts.filter(p => p.bestseller).slice(0, 6)
+  const allProducts       = allStoreProducts.slice(0, 16)
 
   // ─── Theme-reactive styles ───────────────────────────────────────
   const S = {
-    amber:     isDay ? '#6e3c14' : '#dcb991',
-    amberDark: isDay ? '#5a2d0c' : '#b5732a',
+    amber:     isDay ? '#a86f2a' : '#dcb991',
+    amberDark: isDay ? '#8c551c' : '#b5732a',
     bg:        isDay ? '#ffffff' : '#0f1510',
     card:      isDay ? '#f5f5f5' : '#1a2318',
     imgBg:     isDay ? '#e0dcd6' : '#141c12',

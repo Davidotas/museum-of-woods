@@ -60,28 +60,28 @@
   --nav-mobile-bg:   rgba(10,16,12,0.98);
 }
 
-/* ── Day theme — pure white + black + brown ──────────────────── */
+/* ── Day theme — pure white + warm amber ──────────────────────── */
 html.day {
   --cr-forest:   255 255 255;    /* #ffffff pure white bg         */
   --cr-bark:     245 245 245;    /* #f5f5f5 light gray panels     */
-  --cr-amber:    110 60 20;      /* #6e3c14 deep brown accent     */
-  --cr-grain:    140 100 65;     /* #8c6441 medium brown          */
+  --cr-amber:    168 111 42;     /* #a86f2a warm caramel amber    */
+  --cr-grain:    190 140 80;     /* #be8c50 lighter warm grain    */
   --cr-moss:     30 60 32;       /* #1e3c20 deep green            */
   --cr-fog:      10 10 10;       /* #0a0a0a near-black text       */
   --cr-fog2:     50 50 50;       /* #323232 dark secondary text   */
   --cr-fog3:     110 110 110;    /* #6e6e6e muted/subtle text     */
-  --cr-ember:    90 45 12;       /* #5a2d0c dark ember            */
+  --cr-ember:    140 85 28;      /* #8c551c medium ember          */
   --cr-charcoal: 235 235 235;    /* #ebebeb light border/panel    */
   --cr-card:     248 248 248;    /* #f8f8f8 card background       */
 
   --color-forest:   #ffffff;
   --color-bark:     #f5f5f5;
-  --color-amber:    #6e3c14;
-  --color-grain:    #8c6441;
+  --color-amber:    #a86f2a;
+  --color-grain:    #be8c50;
   --color-fog:      #0a0a0a;
   --color-fog2:     #323232;
   --color-fog3:     #6e6e6e;
-  --color-ember:    #5a2d0c;
+  --color-ember:    #8c551c;
   --color-card:     #f8f8f8;
 
   --bg-primary:   #ffffff;
@@ -90,19 +90,19 @@ html.day {
   --text-primary: #0a0a0a;
   --text-muted:   #323232;
   --text-subtle:  #6e6e6e;
-  --accent:       #6e3c14;
+  --accent:       #a86f2a;
 
   --scene-bg-hex: #f5f5f5;
-  --spiral-emissive: 0x6e3c14;
+  --spiral-emissive: 0xa86f2a;
   --cart-bg:      #ffffff;
 
-  /* Nav — always dark regardless of day/night */
-  --nav-bg-top:      rgba(5,5,5,0.75);
-  --nav-bg-scrolled: rgba(5,5,5,0.97);
-  --nav-text:        rgba(255,255,255,0.78);
-  --nav-text-active: #dcb991;
-  --nav-border:      rgba(255,255,255,0.06);
-  --nav-mobile-bg:   rgba(5,5,5,0.99);
+  /* Nav — light in day mode */
+  --nav-bg-top:      rgba(255,255,255,0.82);
+  --nav-bg-scrolled: rgba(255,255,255,0.97);
+  --nav-text:        rgba(20,20,20,0.68);
+  --nav-text-active: #a86f2a;
+  --nav-border:      rgba(0,0,0,0.07);
+  --nav-mobile-bg:   rgba(250,250,248,0.99);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }

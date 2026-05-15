@@ -4,16 +4,18 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Nav from '../components/Nav'
 import CartSidebar from '../components/CartSidebar'
-import { products, categories } from '../data/products'
 import { useCartStore } from '../store/cart'
 import { useThemeStore } from '../store/theme'
+import { useProductStore } from '../store/products'
 import Price from '../components/Price'
 
 export default function ShopPage() {
   const [activeCategory, setActiveCategory] = useState('all')
   const [justAdded, setJustAdded] = useState(null)
-  const addItem   = useCartStore(s => s.addItem)
-  const isDay     = useThemeStore(s => s.isDay)
+  const addItem    = useCartStore(s => s.addItem)
+  const isDay      = useThemeStore(s => s.isDay)
+  const products   = useProductStore(s => s.products)
+  const categories = useProductStore(s => s.categories)
 
   const filtered = activeCategory === 'all'
     ? products
@@ -33,11 +35,11 @@ export default function ShopPage() {
   const text30   = isDay ? 'rgba(10,10,10,0.40)'   : 'rgba(255,255,255,0.30)'
   const text20   = isDay ? 'rgba(10,10,10,0.30)'   : 'rgba(255,255,255,0.20)'
   const text60   = isDay ? 'rgba(10,10,10,0.65)'   : 'rgba(255,255,255,0.60)'
-  const amber    = isDay ? '#6e3c14'               : '#c9a27e'
+  const amber    = isDay ? '#a86f2a'               : '#c9a27e'
   const border5  = isDay ? 'rgba(10,10,10,0.06)'   : 'rgba(255,255,255,0.05)'
   const border10 = isDay ? 'rgba(10,10,10,0.10)'   : 'rgba(255,255,255,0.10)'
   const filterBtn = isDay
-    ? 'border-[rgba(10,10,10,0.15)] text-[rgba(10,10,10,0.45)] hover:border-[#6e3c14] hover:text-[#6e3c14]'
+    ? 'border-[rgba(10,10,10,0.15)] text-[rgba(10,10,10,0.45)] hover:border-[#a86f2a] hover:text-[#a86f2a]'
     : 'border-white/10 text-white/35 hover:border-amber/40 hover:text-amber'
 
   return (

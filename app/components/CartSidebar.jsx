@@ -2,10 +2,12 @@
 
 import Link from 'next/link'
 import { useCartStore } from '../store/cart'
+import { useCurrencyStore } from '../store/currency'
 import { CartIcon, CloseIcon, MinusIcon, PlusIcon } from './Icons'
 
 export default function CartSidebar() {
   const { items, isOpen, closeCart, removeItem, updateQty, total, count } = useCartStore()
+  const format = useCurrencyStore(s => s.format)
 
   return (
     <>
@@ -85,7 +87,7 @@ export default function CartSidebar() {
                       </button>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="font-serif text-sm text-amber">£{(item.price * item.qty).toLocaleString()}</span>
+                      <span className="font-serif text-sm text-amber">{format(item.price * item.qty)}</span>
                       <button
                         onClick={() => removeItem(item.key)}
                         className="text-fog/20 hover:text-fog/50 transition-colors"
@@ -106,7 +108,7 @@ export default function CartSidebar() {
           <div className="px-6 py-5 border-t border-fog/8">
             <div className="flex items-center justify-between mb-1">
               <span className="font-sans text-xs tracking-[.15em] uppercase text-fog/40">Subtotal</span>
-              <span className="font-serif text-xl text-fog/90">£{total.toLocaleString()}</span>
+              <span className="font-serif text-xl text-fog/90">{format(total)}</span>
             </div>
             <p className="font-sans text-[10px] text-fog/25 mb-5">
               Engraving, finishing & shipping calculated at checkout
