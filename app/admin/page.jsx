@@ -60,22 +60,59 @@ function ProductForm({ product, onSave, onCancel, dynamicCategories = [] }) {
     occasion: [], emotion: 'love',
   })
   const [imgPreviews, setImgPreviews] = useState(form.images || [])
-  const [dragOver, setDragOver] = useState(false)
+  const [dragOver, setDragOver]       = useState(false)
+  const [uploading, setUploading]     = useState(false)
+  const [uploadErr, setUploadErr]     = useState('')
   const fileRef = useRef()
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
-  const handleFiles = useCallback((files) => {
+  // Upload each file to server → get back a public URL (no base64 bloat)
+  const handleFiles = useCallback(async (files) => {
     const valid = Array.from(files).filter(f => f.type.startsWith('image/'))
-    const remaining = MAX_IMAGES - imgPreviews.length
-    const toAdd = valid.slice(0, remaining)
-    toAdd.forEach(file => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setImgPreviews(prev => [...prev, e.target.result])
-        setForm(f => ({ ...f, images: [...(f.images || []), e.target.result] }))
-      }
-      reader.readAsDataURL(file)
-    })
+    const slots = MAX_IMAGES - imgPreviews.length
+    const toAdd = valid.slice(0, slots)
+    if (!toAdd.length) return
+
+    setUploading(true)
+    setUploadErr('')
+
+    // Show local previews immediately so the UI feels fast
+    const localPreviews = toAdd.map(f => URL.createObjectURL(f))
+    setImgPreviews(prev => [...prev, ...localPreviews])
+
+    try {
+      const uploaded = await Promise.all(
+        toAdd.map(async (file, idx) => {
+          const fd = new FormData()
+          fd.append('file', file)
+          const res = await fetch('/api/upload', { method: 'POST', body: fd })
+          if (!res.ok) throw new Error(`Upload failed for ${file.name}`)
+          const { url } = await res.json()
+          return { idx, url, local: localPreviews[idx] }
+        })
+      )
+
+      // Replace local blob previews with real server URLs
+      setImgPreviews(prev => {
+        const next = [...prev]
+        uploaded.forEach(({ url, local }) => {
+          const i = next.indexOf(local)
+          if (i !== -1) next[i] = url
+        })
+        return next
+      })
+      setForm(f => {
+        const existing = (f.images || []).filter(u => !localPreviews.includes(u))
+        const urls = uploaded.map(u => u.url)
+        return { ...f, images: [...existing, ...urls] }
+      })
+    } catch (err) {
+      setUploadErr('Some images failed to upload. Please try again.')
+      // Remove failed local previews
+      setImgPreviews(prev => prev.filter(p => !localPreviews.includes(p)))
+    } finally {
+      setUploading(false)
+    }
   }, [imgPreviews.length])
 
   const removeImg = (i) => {
@@ -138,27 +175,49 @@ function ProductForm({ product, onSave, onCancel, dynamicCategories = [] }) {
                 </span>
               </div>
 
+              {/* Upload error */}
+              {uploadErr && (
+                <div className="mb-3 px-4 py-2.5 rounded-lg font-sans text-xs"
+                  style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', color: '#f87171' }}>
+                  ⚠️ {uploadErr}
+                </div>
+              )}
+
               {/* Drop zone */}
               {imgPreviews.length < MAX_IMAGES && (
                 <div
-                  className="relative flex flex-col items-center justify-center gap-3 mb-4 rounded-xl cursor-pointer transition-all"
+                  className="relative flex flex-col items-center justify-center gap-3 mb-4 rounded-xl transition-all"
                   style={{
                     height: 120,
-                    border: `2px dashed ${dragOver ? '#c9a27e' : 'rgba(201,162,126,0.2)'}`,
+                    border: `2px dashed ${dragOver ? '#c9a27e' : uploading ? 'rgba(201,162,126,0.5)' : 'rgba(201,162,126,0.2)'}`,
                     background: dragOver ? 'rgba(201,162,126,0.05)' : 'rgba(255,255,255,0.02)',
+                    cursor: uploading ? 'wait' : 'pointer',
+                    opacity: uploading ? 0.7 : 1,
                   }}
-                  onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+                  onDragOver={e => { e.preventDefault(); if (!uploading) setDragOver(true) }}
                   onDragLeave={() => setDragOver(false)}
-                  onDrop={e => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files) }}
-                  onClick={() => fileRef.current?.click()}
+                  onDrop={e => { e.preventDefault(); setDragOver(false); if (!uploading) handleFiles(e.dataTransfer.files) }}
+                  onClick={() => { if (!uploading) fileRef.current?.click() }}
                 >
-                  <span className="text-2xl">📸</span>
-                  <div className="text-center">
-                    <p className="font-sans text-sm" style={{ color: '#c9a27e' }}>Drop images here or click to upload</p>
-                    <p className="font-sans text-[11px] mt-1" style={{ color: 'rgba(245,242,236,0.3)' }}>
-                      JPG, PNG, WebP — up to {MAX_IMAGES} images total
-                    </p>
-                  </div>
+                  {uploading ? (
+                    <>
+                      <svg className="animate-spin w-6 h-6" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="rgba(201,162,126,0.3)" strokeWidth="3"/>
+                        <path d="M12 2a10 10 0 0 1 10 10" stroke="#c9a27e" strokeWidth="3" strokeLinecap="round"/>
+                      </svg>
+                      <p className="font-sans text-sm" style={{ color: '#c9a27e' }}>Uploading images…</p>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-2xl">📸</span>
+                      <div className="text-center">
+                        <p className="font-sans text-sm" style={{ color: '#c9a27e' }}>Drop images here or click to upload</p>
+                        <p className="font-sans text-[11px] mt-1" style={{ color: 'rgba(245,242,236,0.3)' }}>
+                          JPG, PNG, WebP — up to {MAX_IMAGES} images · max 10 MB each
+                        </p>
+                      </div>
+                    </>
+                  )}
                   <input ref={fileRef} type="file" accept="image/*" multiple className="sr-only"
                     onChange={e => handleFiles(e.target.files)} />
                 </div>
@@ -351,10 +410,10 @@ function ProductForm({ product, onSave, onCancel, dynamicCategories = [] }) {
                 style={{ border: '1px solid rgba(245,242,236,0.1)', color: 'rgba(245,242,236,0.5)' }}>
                 Cancel
               </button>
-              <button onClick={() => onSave(form)}
-                className="flex-1 py-3.5 font-sans text-xs tracking-[.15em] uppercase rounded-lg transition-all"
+              <button onClick={() => onSave(form)} disabled={uploading}
+                className="flex-1 py-3.5 font-sans text-xs tracking-[.15em] uppercase rounded-lg transition-all disabled:opacity-50"
                 style={{ background: '#c9a27e', color: '#0f1510' }}>
-                {isNew ? 'Create Product' : 'Save Changes'}
+                {uploading ? 'Uploading images…' : isNew ? 'Create Product' : 'Save Changes'}
               </button>
             </div>
           </div>
@@ -364,9 +423,42 @@ function ProductForm({ product, onSave, onCancel, dynamicCategories = [] }) {
   )
 }
 
+const TIMEOUT_MS  = 15 * 60 * 1000  // 15 minutes idle → logout
+const WARNING_MS  = 14 * 60 * 1000  // warn at 14 minutes
+
 /* ── Main Admin Page ────────────────────────────────────── */
 export default function AdminPage() {
   const [auth, setAuth]           = useState(false)
+  const [showWarning, setShowWarning] = useState(false)
+  const idleTimer    = useRef(null)
+  const warnTimer    = useRef(null)
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('mow_admin')
+    setAuth(false)
+    setShowWarning(false)
+  }, [])
+
+  const resetIdle = useCallback(() => {
+    setShowWarning(false)
+    clearTimeout(idleTimer.current)
+    clearTimeout(warnTimer.current)
+    warnTimer.current = setTimeout(() => setShowWarning(true), WARNING_MS)
+    idleTimer.current = setTimeout(logout, TIMEOUT_MS)
+  }, [logout])
+
+  useEffect(() => {
+    if (!auth) return
+    const events = ['mousemove', 'keydown', 'click', 'touchstart', 'scroll']
+    events.forEach(e => window.addEventListener(e, resetIdle, { passive: true }))
+    resetIdle()
+    return () => {
+      events.forEach(e => window.removeEventListener(e, resetIdle))
+      clearTimeout(idleTimer.current)
+      clearTimeout(warnTimer.current)
+    }
+  }, [auth, resetIdle])
+
   useEffect(() => {
     // Auto-auth in dev OR if previously authenticated
     if (process.env.NODE_ENV === 'development' || localStorage.getItem('mow_admin') === '1') {
@@ -519,6 +611,25 @@ export default function AdminPage() {
 
   return (
     <>
+      {/* ── Inactivity warning banner ── */}
+      {showWarning && (
+        <div className="fixed top-0 inset-x-0 z-[300] flex items-center justify-between px-6 py-3"
+          style={{ background: '#b45309', boxShadow: '0 2px 12px rgba(0,0,0,0.4)' }}>
+          <div className="flex items-center gap-3">
+            <span className="text-lg">⏰</span>
+            <p className="font-sans text-sm font-medium" style={{ color: '#fff' }}>
+              You've been inactive for 14 minutes. You'll be logged out in 1 minute.
+            </p>
+          </div>
+          <button
+            onClick={resetIdle}
+            className="px-4 py-1.5 rounded-lg font-sans text-xs font-medium transition-all hover:opacity-90"
+            style={{ background: '#fff', color: '#b45309' }}>
+            Stay logged in
+          </button>
+        </div>
+      )}
+
       {/* Product form modal */}
       {editing && (
         <ProductForm
@@ -565,7 +676,7 @@ export default function AdminPage() {
               </button>
             ))}
           </nav>
-          <div className="p-4" style={{ borderTop: '1px solid rgba(245,242,236,0.05)' }}>
+          <div className="p-4 space-y-2" style={{ borderTop: '1px solid rgba(245,242,236,0.05)' }}>
             <Link href="/" className="flex items-center gap-2 font-sans text-xs transition-colors"
               style={{ color: 'rgba(245,242,236,0.3)' }}
               onMouseEnter={e => e.currentTarget.style.color = 'rgba(245,242,236,0.7)'}
@@ -574,6 +685,17 @@ export default function AdminPage() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12H19M5 12l7-7M5 12l7 7"/></svg>
               Back to site
             </Link>
+            <button onClick={logout}
+              className="flex items-center gap-2 font-sans text-xs w-full transition-colors"
+              style={{ color: 'rgba(220,38,38,0.5)' }}
+              onMouseEnter={e => e.currentTarget.style.color = 'rgba(220,38,38,0.9)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'rgba(220,38,38,0.5)'}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+              </svg>
+              Log out
+            </button>
           </div>
         </aside>
 
