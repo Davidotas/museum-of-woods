@@ -47,10 +47,10 @@ const formatPrice = (gbpPrice, currency) => {
 export const useCurrencyStore = create(
   persist(
     (set, get) => ({
-      currency:  SEED_RATES.GB,
-      country:   'GB',
+      currency:  SEED_RATES.NG,
+      country:   'NG',
       detected:  false,
-      forcedKey: null,          // admin override key e.g. 'US', or null = auto-detect
+      forcedKey: 'NG',          // default to NGN; admin can change via Currency tab
       rates:     { ...SEED_RATES },
 
       detect: async () => {
@@ -125,7 +125,7 @@ export const useCurrencyStore = create(
       resetRates: () => set({ rates: { ...SEED_RATES } }),
     }),
     {
-      name: 'mow-currency-v2',
+      name: 'mow-currency-v3',
       storage: safeStorage,
       partialize: (state) => ({
         forcedKey: state.forcedKey,

@@ -87,6 +87,7 @@ export const useProductStore = create(
         }
         // Optimistic update (immediately visible everywhere)
         set(s => ({ products: [...s.products, product] }))
+
         // Persist to DB
         try {
           const res = await fetch('/api/products', {
@@ -98,6 +99,37 @@ export const useProductStore = create(
         } catch (err) {
           console.error('addProduct DB error:', err.message)
         }
+
+        // Sync to Stripe (non-blocking — don't fail if Stripe errors)
+        try {
+          const sr = await fetch('/api/stripe/sync-product', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({
+              id,
+              name:        product.name,
+              price:       product.price,
+              description: product.description,
+              images:      product.images,
+            }),
+          })
+          if (sr.ok) {
+            const { stripeProductId, stripePriceId } = await sr.json()
+            // Store stripe IDs on the product in state + DB
+            const updated = { ...product, stripeProductId, stripePriceId }
+            set(s => ({
+              products: s.products.map(p => p.id === id ? updated : p),
+            }))
+            await fetch('/api/products', {
+              method:  'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body:    JSON.stringify({ id, stripeProductId, stripePriceId }),
+            })
+          }
+        } catch (err) {
+          console.warn('Stripe sync skipped:', err.message)
+        }
+
         return product
       },
 

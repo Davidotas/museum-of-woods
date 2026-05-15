@@ -781,6 +781,32 @@ export default function AdminPage() {
                       </tr>
                     </thead>
                     <tbody>
+                      {filtered.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="px-5 py-16 text-center">
+                            <div className="flex flex-col items-center gap-4">
+                              <div className="w-16 h-16 rounded-full flex items-center justify-center"
+                                style={{ background: 'rgba(201,162,126,0.08)', border: '1px solid rgba(201,162,126,0.15)' }}>
+                                <span className="text-2xl">📦</span>
+                              </div>
+                              <div>
+                                <p className="font-serif text-lg mb-1" style={{ color: '#f5f2ec' }}>No products yet</p>
+                                <p className="font-sans text-xs" style={{ color: 'rgba(245,242,236,0.35)' }}>
+                                  {search || filterCat !== 'all' ? 'No products match your search.' : 'Add your first product to get started.'}
+                                </p>
+                              </div>
+                              {!search && filterCat === 'all' && (
+                                <button onClick={() => setEditing('new')}
+                                  className="flex items-center gap-2 px-5 py-2.5 font-sans text-xs tracking-[.15em] uppercase rounded-lg transition-all hover:opacity-90"
+                                  style={{ background: '#c9a27e', color: '#0f1510' }}>
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                                  Add your first product
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
                       {filtered.map((p, i) => (
                         <tr key={p.id}
                           style={{ background: i % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent', borderBottom: '1px solid rgba(245,242,236,0.04)' }}>

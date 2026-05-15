@@ -84,7 +84,7 @@ export async function DELETE(req) {
 
 // Normalise a product object to match the DB schema
 function normalise(p) {
-  return {
+  const row = {
     id:          String(p.id || `prod_${Date.now()}`),
     name:        p.name        || '',
     price:       Number(p.price) || 0,
@@ -99,4 +99,7 @@ function normalise(p) {
     reviews:     Number(p.reviews) || 0,
     featured:    Boolean(p.featured),
   }
+  if (p.stripeProductId) row.stripe_product_id = p.stripeProductId
+  if (p.stripePriceId)   row.stripe_price_id   = p.stripePriceId
+  return row
 }

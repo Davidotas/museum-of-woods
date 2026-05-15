@@ -93,6 +93,27 @@ export default function ShopPage() {
             ))}
           </div>
 
+          {/* ── Empty state ── */}
+          {filtered.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-28 text-center">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+                style={{ background: `rgba(201,162,126,0.08)`, border: `1px solid rgba(201,162,126,0.15)` }}>
+                <span className="text-3xl">🪵</span>
+              </div>
+              <h2 className="font-serif text-2xl mb-2" style={{ color: text90 }}>No pieces here yet</h2>
+              <p className="font-sans text-sm max-w-xs leading-relaxed" style={{ color: text30 }}>
+                New products are being crafted. Check back soon or explore all categories.
+              </p>
+              {activeCategory !== 'all' && (
+                <button onClick={() => setActiveCategory('all')}
+                  className="mt-6 font-sans text-xs tracking-[.15em] uppercase px-6 py-3 rounded-xl transition-all"
+                  style={{ background: amber, color: '#fff' }}>
+                  View all products
+                </button>
+              )}
+            </div>
+          )}
+
           {/* ── Products grid ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map(p => (
